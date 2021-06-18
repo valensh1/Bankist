@@ -76,6 +76,16 @@ const displayMovements = (movements) => {   // Function in which the purpose is 
 };
 displayMovements(account1.movements); // Invoke the displayMovements function supplying the function with the account1.movements array
 
+
+const calcDisplayBalance = (movements) => { // Function that accepts a movements array and ultimately calculates a balance to display in the DOM
+  const balance = movements.reduce((accum, current) => { // Creation of a balance variable that consists of the returned value from running the reduce method on the movements array; The method accepts an accum variable which starts at 0 unless otherwise specified at end of reduce method and then adds each current value on to the accum variable. So accum starts at 0 (unless otherwise specified) takes the first number and then adds that to the accum variable then goes to the 2nd number in array and adds that to accum variable, etc.
+    return accum + current  // Add accum + current; Accum variable which starts at 0 unless otherwise specified at end of reduce method and then adds each current value on to the accum variable. So accum starts at 0 (unless otherwise specified) takes the first number and then adds that to the accum variable then goes to the 2nd number in array and adds that to accum variable, etc.
+  }, 0);                    // Don't need to put 0 here as the default is 0 but if you wanted it to start at a different number you would insert a number here. For example, if you wanted 10 added to the sum of the array you would put 10 here. as the accum variable would start with 10 instead of starting at 0
+  labelBalance.textContent = `${balance} EUR`; // Adds balance inside a template literal to DOM
+};   
+calcDisplayBalance(account1.movements); // Invoking the calcDisplayBalance method with account 1 object's movements array
+
+
 const createUserNames = (accounts) => { // Function to convert account owner name to a username based on their initials; UserName will be a new key we are adding to each respective person's account object. Pass the accounts array variable which consists of [account1, account2, account3, account4] into function. Each one of these 4 accounts is a reference to an object which contains owner name, movements, interestRate & PIN
   accounts.forEach((acct) => { // Use forEach method to loop over accounts array variable because we don't want to return a new array we are simply just mutating the current objects that are contained within the accounts array variable.
   acct.username = acct.owner.toLowerCase().split(' ').map(name => name[0]).join(''); // Create a key on each person's account object called userName (acc.userName) and set that initially equal to acct.owner (for example - owner: 'Steven Thomas Williams') that converts the owner name into initials by first lower casing any letters then split the owner name string (split method with indicator being spaces in the string ' ') into an array so we can loop over the array containing each owners name. We then loop over the array of each owner's name by using the map method and return the first letter of each word (indicated by 0 index in name[0]) and then lastly we join the array back into a string with no spaces using the join method and no space indicator ('' - no spaces between the quotes). 
@@ -83,6 +93,8 @@ const createUserNames = (accounts) => { // Function to convert account owner nam
 };
 createUserNames(accounts); // Invokes createUserNames function with the accounts array variable supplied to function ([account1, account2, account3, account4] supplied to function) 
 console.log(accounts); // Prints out each account object in the accounts array variable with the newly added userName added to each object in the array
+
+
 
 
 /////////////////////////////////////////////////
