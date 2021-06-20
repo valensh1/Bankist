@@ -159,6 +159,16 @@ btnTransfer.addEventListener('click', (event) => { // Transfer money container w
      updateUI(currentAccount); // Invoke the updateUI function which retrieves balances and pass in the currentAccount object as the argument
 });
 
+// Event Handler - Close Account
+btnClose.addEventListener('click', (event) => {
+  event.preventDefault();
+  if(inputCloseUsername.value === currentAccount.username && Number(inputClosePin.value) === currentAccount.pin){
+    const index = accounts.findIndex(account => account.username === currentAccount.username);
+    console.log(index);
+    accounts.splice(index, 1);
+  }
+  
+})
 
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
