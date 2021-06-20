@@ -160,14 +160,20 @@ btnTransfer.addEventListener('click', (event) => { // Transfer money container w
 });
 
 // Event Handler - Close Account
-btnClose.addEventListener('click', (event) => {
-  event.preventDefault();
-  if(inputCloseUsername.value === currentAccount.username && Number(inputClosePin.value) === currentAccount.pin){
-    const index = accounts.findIndex(account => account.username === currentAccount.username);
-    console.log(index);
-    accounts.splice(index, 1);
+btnClose.addEventListener('click', (event) => {  // Event handler to close account
+  event.preventDefault(); // Method that prevents default action of form which is the page refreshing upon hitting submit button or ENTER
+  if(inputCloseUsername.value === currentAccount.username && Number(inputClosePin.value) === currentAccount.pin){  // If statement checking to make sure before closing account that the username of the account to close matches the current account holders username so he can't just close anybody's account. Also, we want to ensure the pin number entered matches the current account holders pin number as well. To get input values from fields you need to use .value and any input returned from input fields are returned as a string so we need to convert to a Number() method.
+    const index = accounts.findIndex(account => account.username === currentAccount.username); // Get the index of the account to delete using the findIndex() method so that we can find the index of the account which the user is trying to delete which can only be their account.
+    
+    // Delete Account
+    accounts.splice(index, 1); // Delete account with the splice method in which the first argument is the index position to delete and the 2nd argument is how many elements to delete which in this case is just 1 because we only allow the user to delete their account and that's it.
+
+    // Hide UI
+    containerApp.style.opacity = 0; // Upon deletion of account we want to hide all the data and user interface so we set the opacity back to 0.
+
+    // Clear input fields after input
+    inputCloseUsername.value = inputClosePin.value = ''; // Resetting the input fields after the user hits ENTER or the arrow submit button so the input fields no longer are in focus.
   }
-  
 })
 
 /////////////////////////////////////////////////
