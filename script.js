@@ -77,10 +77,10 @@ const displayMovements = (account) => {   // Function in which the purpose is to
 
 
 const calcDisplayBalance = (account) => { // Function that accepts an entire account object and ultimately calculates a balance to display in the DOM
-  const balance = account.movements.reduce((accum, current) => { // Creation of a balance variable that consists of the returned value from running the reduce method on the account.movements array; The method accepts an accum variable which starts at 0 unless otherwise specified at end of reduce method and then adds each current value on to the accum variable. So accum starts at 0 (unless otherwise specified) takes the first number and then adds that to the accum variable then goes to the 2nd number in array and adds that to accum variable, etc.
+  account.balance = account.movements.reduce((accum, current) => { // Creation of a balance variable on the account holders object that consists of the returned value from running the reduce method on the account.movements array; The method accepts an accum variable which starts at 0 unless otherwise specified at end of reduce method and then adds each current value on to the accum variable. So accum starts at 0 (unless otherwise specified) takes the first number and then adds that to the accum variable then goes to the 2nd number in array and adds that to accum variable, etc.
     return accum + current  // Add accum + current; Accum variable which starts at 0 unless otherwise specified at end of reduce method and then adds each current value on to the accum variable. So accum starts at 0 (unless otherwise specified) takes the first number and then adds that to the accum variable then goes to the 2nd number in array and adds that to accum variable, etc.
   }, 0);                    // Don't need to put 0 here as the default is 0 but if you wanted it to start at a different number you would insert a number here. For example, if you wanted 10 added to the sum of the array you would put 10 here. as the accum variable would start with 10 instead of starting at 0
-  labelBalance.textContent = `${balance}€`; // Adds balance inside a template literal to DOM
+  labelBalance.textContent = `${account.balance}€`; // Adds the newly created key/value pair (account.balance) we added to account holder's object inside a template literal to DOM
 };   
 
 
@@ -107,10 +107,21 @@ const createUserNames = (accounts) => { // Function to convert account owner nam
 createUserNames(accounts); // Invokes createUserNames function with the accounts array variable supplied to function ([account1, account2, account3, account4] supplied to function) 
 console.log(accounts); // Prints out each account object in the accounts array variable with the newly added userName added to each object in the array
 
-// EVENT HANDLERS
+const updateUI = (account) => { // Function invoking all the individual balance displays
+      // Display Movements
+      displayMovements(account); // Invoke the displayMovements function supplying the function with the current account holder logged in's entire object
+
+      // Display Balance
+      calcDisplayBalance(account); // Invoking the calcDisplayBalance method with current account holder logged in's entire object
+  
+      // Display Summary
+      calcDisplaySummary(account); // Invoking the calcDisplaySummary method with current account holder logged in's entire object
+}
+
+//--------------------------------------EVENT HANDLERS----------------------------------------------
 let currentAccount; // Creation of a global variable currentAccount to display the current account holder who is logged in. Created this variable so we can get access to this variable from inside functions and also reassign values to it
 
-// User Login Event Handler
+// Event Handler - User Login
 btnLogin.addEventListener('click', (event) => { // Login Arrow Button; Must use event here to pass into the preventDefault() method in order to stop the default of a button click which is refreshing the page
   event.preventDefault(); // Method that prevents form from submitting
   currentAccount = accounts.find((acct => acct.username === inputLoginUsername.value)) // Assign currentAccount variable to the current account holder object for the account who is logged in. Use the find method to loop through the accounts variable array to find the account object in which accounts username (acct.username) matches the username login input from form (inputLoginUsername.value); acct.username is the 3 lower case initials we calc'd in createUserNames fuction above.
@@ -126,15 +137,26 @@ btnLogin.addEventListener('click', (event) => { // Login Arrow Button; Must use 
     inputLoginUsername.value = inputLoginPin.value = ''; // Set input pin field to a blank empty string and then since the order of operations works from right to left it then assigns login username field to blank as well.
     inputLoginPin.blur(); // Blur method causes element to lose its focus.
 
-    // Display Movements
-    displayMovements(currentAccount); // Invoke the displayMovements function supplying the function with the current account holder logged in's entire object
-
-    // Display Balance
-    calcDisplayBalance(currentAccount); // Invoking the calcDisplayBalance method with current account holder logged in's entire object
-
-    // Display Summary
-    calcDisplaySummary(currentAccount); // Invoking the calcDisplaySummary method with current account holder logged in's entire object
+    // Update User Interface (UI)
+    updateUI(currentAccount);
   }
+});
+
+// Event Handler - Transfer Money To
+btnTransfer.addEventListener('click', (event) => { // Transfer money container where user enters transfer to id of person they want to transfer money to and the amount and when they click ENTER or click on the arrow function is when it runs all the code below.
+  event.preventDefault(); // Prevents default form action when user clicks button of auto refreshing page as we don't want page to refresh and lose all our data.
+  const amount = Number(inputTransferAmount.value); // Create amount variable from the user input of the amount to transfer. All input from user is a string so we have to convert to a number using the Number() method.
+  const receiverAcct = accounts.find(acct => acct.username === inputTransferTo.value); // Create a receiverAcct variable which is the account object of the account holder receiving the money. We get the account holder object of the person receiving the money by taking the 'transfer to' user input in which they input a user name and then use the find method on that value to find the first object in our accounts variable array where the username equals the inputted username to transfer money to.
+  console.log(amount, receiverAcct);
+
+  inputTransferAmount.value = inputTransferTo.value = ''; // Clear the transfer money section input fields after clicking the arrow button or the ENTER button to transfer money
+
+  if (amount > 0 && receiverAcct && currentAccount.balance >= amount && receiverAcct ?.username !== currentAccount.username) // Conditions that need to check out as TRUE in order to have a valid money transfer such as the balance in holders account has to be >= amount to be transferred, etc.
+    currentAccount.movements.push(-amount); // Push current transfer amount as a negative to the current account holders movements array
+    receiverAcct.movements.push(amount); // Push current transfer amount as a positive to the receiver account holders movements array
+
+     // Update User Interface (UI)
+     updateUI(currentAccount); // Invoke the updateUI function which retrieves balances and pass in the currentAccount object as the argument
 });
 
 
