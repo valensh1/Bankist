@@ -107,6 +107,7 @@ const createUserNames = (accounts) => { // Function to convert account owner nam
 createUserNames(accounts); // Invokes createUserNames function with the accounts array variable supplied to function ([account1, account2, account3, account4] supplied to function) 
 console.log(accounts); // Prints out each account object in the accounts array variable with the newly added userName added to each object in the array
 
+
 const updateUI = (account) => { // Function invoking all the individual balance displays
       // Display Movements
       displayMovements(account); // Invoke the displayMovements function supplying the function with the current account holder logged in's entire object
@@ -158,6 +159,21 @@ btnTransfer.addEventListener('click', (event) => { // Transfer money container w
      // Update User Interface (UI)
      updateUI(currentAccount); // Invoke the updateUI function which retrieves balances and pass in the currentAccount object as the argument
 });
+
+// Event Handler - Request Loan
+btnLoan.addEventListener('click', (event) => { // Event handler for requesting a loan section
+  event.preventDefault(); // Method that prevents default action of form which is the page refreshing upon hitting submit button or ENTER
+  const amount = Number(inputLoanAmount.value); // Creation of variable that takes users loan amount and converts it to a number using the Number method() since everything a user inputs on a form is originally a string.
+  const loanAmountPercentage = .10; // To receive a loan there must be a deposit of at least this percentage of the loan amount.
+  if(amount > 0 && currentAccount.movements.some(mov => mov >= amount * loanAmountPercentage)) { // If condition to check to see if the loan amount is greater than 0 AND the use of the some method to see if there was some or any deposits that equaled at least 10% or greater of the requested loan amount.
+    currentAccount.movements.push(amount); // Add loan amount to accound holders movements array
+    updateUI(currentAccount); // Invoke updateUI function to update account holders balances upon receiving the loan
+    inputLoanAmount.value = ''; // Blank out the input field after hitting ENTER or arrow submit button so that the input field loses its focus.
+  } else {
+      alert(`Must have a deposit that is greater than or equal to ${loanAmountPercentage * 100}% the loan amount requested`); // Alert if loan amount requested is larger than the 10% rule of needing at least one deposit that is greater than or equal to the LoanAmountPercentage * loan amount requested.
+  }
+  })
+
 
 // Event Handler - Close Account
 btnClose.addEventListener('click', (event) => {  // Event handler to close account
