@@ -92,8 +92,12 @@ const calcDisplaySummary = (account) => { // Function that calculates the summar
   labelSumIn.textContent = `${deposits}€`; // Update DOM for total deposits
 
   // Withdrawals / Money Going Out - Summary Balance Total
-  const moneyOut = movements.filter(mov => mov < 0).reduce((accum, current) => accum + current); // Takes the movements array for each account holder and then filters that movements array for all amounts less than 0 as this represents money going out; The filter method will return a new array with all the amounts that are less than 0. Then we use the reduce method to sum up the array that the filter method returned to get our total moneyOut balance.
+  if (account.movements.some(el => el < 0)){ // If current Account holders movements have some movements that are below 0 then do code below. Use .some() method to determine if the current account holder's movements have any or some negative amounts in there and if so then do code below. If didn't have this it would throw an error.
+  const moneyOut = account.movements.filter(mov => mov < 0).reduce((accum, current) => accum + current); // Takes the movements array for each account holder and then filters that movements array for all amounts less than 0 as this represents money going out; The filter method will return a new array with all the amounts that are less than 0. Then we use the reduce method to sum up the array that the filter method returned to get our total moneyOut balance.
   labelSumOut.textContent = `${Math.abs(moneyOut)}€`; // Update DOM for total money going out
+  } else {
+    labelSumOut.textContent = `0€`; // Else if no movements with negative amounts or no money going out then update DOM to reflect 0 for no money going out.
+  }
 
   // Interest - Interest Earned Summary Balance Total
   const interestAmts = account.movements.filter(mov => mov > 0).map(mov => (mov * account.interestRate) / 100).filter(int => int >= 1).reduce((accum, current) => accum + current); // Takes the account.movements array for each account holder and then filters that movements array for all amounts greater than 0 as this represents deposits or money coming in; The filter method will return a new array with all the amounts that are greater than 0. Then we use the map method to loop over each element in the array returned from the filter method and apply the interest rate to that amount IF the interest is greater than or equal to 1. Then we use the reduce method to sum up the array that the map method returned to get our total interest balance.
@@ -120,7 +124,6 @@ const updateUI = (account) => { // Function invoking all the individual balance 
       // Display Summary
       calcDisplaySummary(account); // Invoking the calcDisplaySummary method with current account holder logged in's entire object
 }
-
 
 //--------------------------------------EVENT HANDLERS----------------------------------------------
 let currentAccount; // Creation of a global variable currentAccount to display the current account holder who is logged in. Created this variable so we can get access to this variable from inside functions and also reassign values to it
@@ -203,4 +206,6 @@ btnSort.addEventListener('click', (event) => { // Add event listener to sort the
   sorted = !sorted; // Assign the sorted variable to be equal to the opposite of what it currently is showing so therefore when button is clicked again it will then send the opposite again to the displayMovements function which constantly makes the sort button as you keep clicking it go from sorted ascending to sorted descending.
 });
 
+
+// const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
