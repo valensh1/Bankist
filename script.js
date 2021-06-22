@@ -207,5 +207,44 @@ btnSort.addEventListener('click', (event) => { // Add event listener to sort the
 });
 
 
-// const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+// --------------------------------------------------------------WORKING WITH ARRAYS - ARRAY METHODS PRACTICE WORKING WITH THE BANKIST APPLICATION--------------------------------------------------------------------
+// 1. Retrive the total deposits amount for all account holders
+const totalDeposits = accounts // Creation of totalDeposits variable which loops over each account from the accounts variable
+.flatMap(account => account.movements) // Loops over each account and adds account.movements array from each account into a new array and then flat part from flatMap method then flattens the array so that it is one big array and not an array with 4 sub-arrays for each account inside.
+.filter(amount => amount > 0) // Filter the new array from the flatMap method for any deposits which are amounts greater than 0
+.reduce((accum, current) => accum + current, 0); // Use reduce method to total all the deposits up.
+console.log(totalDeposits); // Prints 25180
+
+// 2. Count how many deposits in bank with at least 1,000
+const numDeposits1Thousand = accounts // Creation of numDeposits1Thousand variable which loops over each account from the accounts variable
+.flatMap(account => account.movements) // // Loops over each account and adds account.movements array from each account into a new array and then flat part from flatMap method then flattens the array so that it is one big array and not an array with 4 sub-arrays for each account inside.
+.filter(amount => amount >= 1000).length // Filter the array returned from flatMap method above and filter for movement amounts greater than 1000; Get the length of the filtered array above which will be all the movement amounts greater than 1000. 
+console.log(numDeposits1Thousand); // Prints 6 - which is 2 (3000, 1300 from account1) + 3 (5000, 3400, 8500 from account2) and 1 (1000 from account4)
+
+// Solution for #2 above using the Reduce Method
+const numDeposits1Thousandv2 = accounts // Creation of numDeposits1Thousand variable which loops over each account from the accounts variable
+.flatMap(account => account.movements) // // Loops over each account and adds account.movements array from each account into a new array and then flat part from flatMap method then flattens the array so that it is one big array and not an array with 4 sub-arrays for each account inside.
+.reduce((accum, current) => { // Reduce method loops over returned array from flatMap above and reduces it to the count of movements >= 1000
+  return current >= 1000 ? accum += 1 : accum; // Take the current amount and if >= 1000 add 1 to the accumulator and if not then leave accumulator as is.
+}, 0); // Starts off the reduce method with a 0;
+console.log(numDeposits1Thousandv2); // Prints 6 - which is 2 (3000, 1300 from account1) + 3 (5000, 3400, 8500 from account2) and 1 (1000 from account4)
+
+// 3. Get the total of the deposits and the withdrawals in one object
+const sums = accounts // Creation of totalDeposits variable which loops over each account from the accounts variable
+.flatMap(account => account.movements) // Loops over each account and adds account.movements array from each account into a new array and then flat part from flatMap method then flattens the array so that it is one big array and not an array with 4 sub-arrays for each account inside.
+.reduce((accum, current) => { // Reduce method loops over returned array from flatMap above and reduces it to what we defined at the end of method which is the count of the {deposits: number, withdrawals: number}
+   current > 0 ? accum.deposits += current : accum.withdrawals += current; // If current number is greater than 0 take the accum (accumulator) and increment the count by 1 on the deposits key in starter object we gave method below. If it isn't above 0 then that means its a withdrawal and we want to decrease the count on the withdrawal key in starter object we gave method below.
+   /* accum[current > 0 ? 'deposits' : 'withdrawals'] += current; ANOTHER WAY TO DO LINE OF CODE DIRECTLY ABOVE */
+   return accum; // Return the accum (accumulator) as this is the variable that stores the ending values which will be our object below with the deposit and withdrawal counts
+}, {deposits: 0, withdrawals: 0}); // ACCUM (ACCUMULATOR) STARTS WITH THIS OBJECT HERE!!!; This is what we are incrementing in the reduce method code above and the final counts of this object will be our accumulator variable that we need to return which we did in line of code directly above.
+console.log(sums); // Prints {deposits: 25180, withdrawals: -7340}
+
+// Solution for #3 above but with destructuring of the deposits and withdrawals variables
+const { deposits, withdrawals } = accounts // DIFFERENT LINE OF CODE THAN SOLUTION ABOVE!!!; Creation of totalDeposits variable which loops over each account from the accounts variable
+.flatMap(account => account.movements) // Loops over each account and adds account.movements array from each account into a new array and then flat part from flatMap method then flattens the array so that it is one big array and not an array with 4 sub-arrays for each account inside.
+.reduce((accum, current) => { // Reduce method loops over returned array from flatMap above and reduces it to what we defined at the end of method which is the count of the {deposits: number, withdrawals: number}
+   current > 0 ? accum.deposits += current : accum.withdrawals += current; // If current number is greater than 0 take the accum (accumulator) and increment the count by 1 on the deposits key in starter object we gave method below. If it isn't above 0 then that means its a withdrawal and we want to decrease the count on the withdrawal key in starter object we gave method below.
+   return accum;  // Return the accum (accumulator) as this is the variable that stores the ending values which will be our object below with the deposit and withdrawal counts
+}, {deposits: 0, withdrawals: 0}); // ACCUM (ACCUMULATOR) STARTS WITH THIS OBJECT HERE!!!; This is what we are incrementing in the reduce method code above and the final counts of this object will be our accumulator variable that we need to return which we did in line of code directly above.
+console.log(deposits, withdrawals); // Prints 25180 -7340; DIFFERENT LINE OF CODE THAN SOLUTION ABOVE; 
 
