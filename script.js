@@ -59,10 +59,12 @@ const inputClosePin = document.querySelector('.form__input--pin');
 
 
 //--------------------------------------FUNCTIONS----------------------------------------------
-const displayMovements = (account) => {   // Function in which the purpose is to loop over each money movement amount (positive for deposit & negative for withdrawals) in the data array for each person's account
+const displayMovements = (account, sort = false) => {   // Function in which the purpose is to loop over each money movement amount (positive for deposit & negative for withdrawals) in the data array for each person's account; Sort parameter is set to a default of false which will keep the original descending order
   containerMovements.innerHTML = '';    // Clears the HTML in this class as our HTML has some placeholders in there and we want to clear them to place our real movement data in there. Using the innerHTML function clears all the HTML within this div class and using the empty string '' does this.
 
-  account.movements.forEach((mov, index) => {   // Loop over each movement (mov) amount supplied to function with forEach method
+  const sortedMovements = sort ? account.movements.slice().sort((a,b) => a - b) : account.movements; // Creation of variable sortedMovements which says if sort argument passed in is true then take a copy of the account.movements array via the slice() method and then sort the movements using the sort method using the callback function of a-b.
+
+  sortedMovements.forEach((mov, index) => {   // Loop over sortedMovement (mov) amount supplied to function with forEach method
     const type = mov > 0 ? 'deposit' : 'withdrawal';  // If movement (mov) is greater than 0 then that means this is a deposit into our account and any negative amount means we are withdrawing. Purpose of this ternary operator is to use the result to modify our class name so that our CSS works and highlights green for deposit and red for withdrawals.
 
     const html = `
@@ -118,6 +120,7 @@ const updateUI = (account) => { // Function invoking all the individual balance 
       // Display Summary
       calcDisplaySummary(account); // Invoking the calcDisplaySummary method with current account holder logged in's entire object
 }
+
 
 //--------------------------------------EVENT HANDLERS----------------------------------------------
 let currentAccount; // Creation of a global variable currentAccount to display the current account holder who is logged in. Created this variable so we can get access to this variable from inside functions and also reassign values to it
@@ -192,16 +195,12 @@ btnClose.addEventListener('click', (event) => {  // Event handler to close accou
   }
 })
 
-/////////////////////////////////////////////////
-/////////////////////////////////////////////////
-// LECTURES
+// Event Handler - Sort Button
+let sorted = false; // Creation of varialbe outside event handler that will be used as a boolean value to determine whether we want the list sorted or not. The default is set to FALSE as this will have the movement displayed in desecending order with the most recent transasction first. But when user clicks sort it will change this sorted variable to true. This variable ultimately gets passed in to the displayMovements function as the opposite of what its showing. So if its showing as true the variable passed in to displayMovements function will be false and vice-versa.
+btnSort.addEventListener('click', (event) => { // Add event listener to sort the movements listing
+  event.preventDefault(); // Method that prevents default action of form which is the page refreshing upon hitting submit button or ENTER
+  displayMovements(currentAccount, !sorted); // Invoking the displayMovements function which passes in the currentAccount and the OPPOSITE of what the sorted variable is currently showing.
+  sorted = !sorted; // Assign the sorted variable to be equal to the opposite of what it currently is showing so therefore when button is clicked again it will then send the opposite again to the displayMovements function which constantly makes the sort button as you keep clicking it go from sorted ascending to sorted descending.
+});
 
-const currencies = new Map([
-  ['USD', 'United States dollar'],
-  ['EUR', 'Euro'],
-  ['GBP', 'Pound sterling'],
-]);
 
-const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
-
-/////////////////////////////////////////////////
