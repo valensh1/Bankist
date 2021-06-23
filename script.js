@@ -70,7 +70,7 @@ const displayMovements = (account, sort = false) => {   // Function in which the
     const html = `
     <div class="movements__row">
       <div class="movements__type movements__type--${type}">${index + 1} ${type}</div>
-      <div class="movements__value">${mov}€</div>
+      <div class="movements__value">${mov.toFixed(2)}€</div>
     </div>`;    // Variable set up so we can use with the insertAdjacentHTML method. Notice we adjusted the class name with the type variable we created above which was the ternary operator
 
     containerMovements.insertAdjacentHTML('afterbegin', html); // Takes the containerMovements DOM variable which is just the overall container for the movements section and uses the insertAdjacentHTML method which basically inserts html right into a specified place in the DOM which in this case is the containerMovements. The first argument of the insertAdjacent HTML is where you want it inserted. The 'afterbegin' argument places the HTML after the element but before any other content that is already present inside that element. In our case with each element it loops over it places it at the beginning of the container element so finally by the last item it loops over that will be the one that shows first up top. This method is basically displaying in descending order. The other option 'beforeend' would place the items in ascending order. The 2nd argument to insertAdjacentHTML is the HTML you want to insert and in our case it is the html variable we created.
@@ -82,26 +82,26 @@ const calcDisplayBalance = (account) => { // Function that accepts an entire acc
   account.balance = account.movements.reduce((accum, current) => { // Creation of a balance variable on the account holders object that consists of the returned value from running the reduce method on the account.movements array; The method accepts an accum variable which starts at 0 unless otherwise specified at end of reduce method and then adds each current value on to the accum variable. So accum starts at 0 (unless otherwise specified) takes the first number and then adds that to the accum variable then goes to the 2nd number in array and adds that to accum variable, etc.
     return accum + current  // Add accum + current; Accum variable which starts at 0 unless otherwise specified at end of reduce method and then adds each current value on to the accum variable. So accum starts at 0 (unless otherwise specified) takes the first number and then adds that to the accum variable then goes to the 2nd number in array and adds that to accum variable, etc.
   }, 0);                    // Don't need to put 0 here as the default is 0 but if you wanted it to start at a different number you would insert a number here. For example, if you wanted 10 added to the sum of the array you would put 10 here. as the accum variable would start with 10 instead of starting at 0
-  labelBalance.textContent = `${account.balance}€`; // Adds the newly created key/value pair (account.balance) we added to account holder's object inside a template literal to DOM
+  labelBalance.textContent = `${account.balance.toFixed(2)}€`; // Adds the newly created key/value pair (account.balance) we added to account holder's object inside a template literal to DOM
 };   
 
 
 const calcDisplaySummary = (account) => { // Function that calculates the summary balance for each account holder (summary balance for deposits/moneyOut/interest)
   // Deposit - Summary Balance Total
   const deposits = account.movements.filter(mov => mov > 0).reduce((accum, current) => accum + current); // Takes the account.movements array for each account holder and then filters that movements array for all amounts greater than 0 as this represents deposits or money coming in; The filter method will return a new array with all the amounts that are greater than 0. Then we use the reduce method to sum up the array that the filter method returned to get our total deposit balance.
-  labelSumIn.textContent = `${deposits}€`; // Update DOM for total deposits
+  labelSumIn.textContent = `${deposits.toFixed(2)}€`; // Update DOM for total deposits
 
   // Withdrawals / Money Going Out - Summary Balance Total
   if (account.movements.some(el => el < 0)){ // If current Account holders movements have some movements that are below 0 then do code below. Use .some() method to determine if the current account holder's movements have any or some negative amounts in there and if so then do code below. If didn't have this it would throw an error.
   const moneyOut = account.movements.filter(mov => mov < 0).reduce((accum, current) => accum + current); // Takes the movements array for each account holder and then filters that movements array for all amounts less than 0 as this represents money going out; The filter method will return a new array with all the amounts that are less than 0. Then we use the reduce method to sum up the array that the filter method returned to get our total moneyOut balance.
-  labelSumOut.textContent = `${Math.abs(moneyOut)}€`; // Update DOM for total money going out
+  labelSumOut.textContent = `${Math.abs(moneyOut).toFixed(2)}€`; // Update DOM for total money going out
   } else {
     labelSumOut.textContent = `0€`; // Else if no movements with negative amounts or no money going out then update DOM to reflect 0 for no money going out.
   }
 
   // Interest - Interest Earned Summary Balance Total
   const interestAmts = account.movements.filter(mov => mov > 0).map(mov => (mov * account.interestRate) / 100).filter(int => int >= 1).reduce((accum, current) => accum + current); // Takes the account.movements array for each account holder and then filters that movements array for all amounts greater than 0 as this represents deposits or money coming in; The filter method will return a new array with all the amounts that are greater than 0. Then we use the map method to loop over each element in the array returned from the filter method and apply the interest rate to that amount IF the interest is greater than or equal to 1. Then we use the reduce method to sum up the array that the map method returned to get our total interest balance.
-  labelSumInterest.textContent = `${interestAmts}€`; // Update DOM for total interest
+  labelSumInterest.textContent = `${interestAmts.toFixed(2)}€`; // Update DOM for total interest
 };
 
 
@@ -169,7 +169,7 @@ btnTransfer.addEventListener('click', (event) => { // Transfer money container w
 // Event Handler - Request Loan
 btnLoan.addEventListener('click', (event) => { // Event handler for requesting a loan section
   event.preventDefault(); // Method that prevents default action of form which is the page refreshing upon hitting submit button or ENTER
-  const amount = Number(inputLoanAmount.value); // Creation of variable that takes users loan amount and converts it to a number using the Number method() since everything a user inputs on a form is originally a string.
+  const amount = Math.floor(inputLoanAmount.value); // Creation of variable that takes users loan amount and rounds input value from user down based on the Math.floor() method. This method does type conversion so this method will automatically change string entered by user as input to a number along with rounding the number down.
   const loanAmountPercentage = .10; // To receive a loan there must be a deposit of at least this percentage of the loan amount.
   if(amount > 0 && currentAccount.movements.some(mov => mov >= amount * loanAmountPercentage)) { // If condition to check to see if the loan amount is greater than 0 AND the use of the some method to see if there was some or any deposits that equaled at least 10% or greater of the requested loan amount.
     currentAccount.movements.push(amount); // Add loan amount to accound holders movements array
