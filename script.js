@@ -12,9 +12,9 @@ const account1 = {
     '2020-01-28T09:15:04.904Z',
     '2020-04-01T10:17:24.185Z',
     '2020-05-08T14:11:59.604Z',
-    '2020-07-26T17:01:17.194Z',
-    '2020-07-28T23:36:17.929Z',
-    '2020-08-01T10:51:36.790Z',
+    '2021-06-20T17:01:17.194Z',
+    '2021-06-22T23:36:17.929Z',
+    '2021-06-23T10:51:36.790Z',
   ],
   currency: 'EUR',
   locale: 'pt-PT' // de-DE
@@ -83,6 +83,32 @@ const inputClosePin = document.querySelector('.form__input--pin');
 
 
 //--------------------------------------FUNCTIONS----------------------------------------------
+
+const formattedMovementDate = (date) => {
+  const dateDiff = ((date1, date2) => { // Creation of function to subtract dates to get the days between
+    return Math.round(Math.abs((date2 - date1) / (1000 * 60 * 60 * 24)));   // Subtract dates and divide by / (1000 (converts miliseconds to seconds) * 60 (converts seconds to minutes) * 60 (converts minutes to hours) * 24 (converts minutes to days)); Math.abs used to eliminate any negatives if the earlier date entered first; There are 24 hours in a day, 60 minutes in one hour, 60 seconds in 1 minute and 1000 miliseconds in one second. We have to do the conversion because just subtracting the dates JavaScript gives the dates in a time since a date back in 1970 for both dates so then when subtracting the 2 dates you get the difference in miliseconds and then you are converting this into days.
+    });
+  const daysPassed = dateDiff (new Date(), date);
+  console.log(daysPassed);
+
+  switch(true) {
+    case daysPassed === 0:
+      return 'Today';
+      break;
+    case daysPassed === 1:
+      return 'Yesterday';
+      break;
+    case daysPassed <= 7:
+      return `${daysPassed} days ago`;
+      break;
+    default:
+      const month = `${date.getMonth() + 1}`.padStart(2, 0); // Creation of a month variable using the getMonth() method; padStart method used so that in case we have months with single digits like months 1-9 it will put a leading 0 so that the date shows 06/24/2021 instead of 6/24/2021. First argument to padStart field is how many total characters there should be after padding (our case its 2) and the 2nd argument is what do you want to pad with and in this case its 0.
+      const day = `${date.getDate()}`.padStart(2, 0); // Creation of a day variable using the getDate() method; padStart method used so that in case we have dates with single digits like days 1-9 it will put a leading 0 so that the date shows 06/09/2021 instead of 6/9/2021. First argument to padStart field is how many total characters there should be after padding (our case its 2) and the 2nd argument is what do you want to pad with and in this case its 0.
+      const year = date.getFullYear(); // Creation of a variable to get full year using the getFullYear method.
+      return `${month}/${day}/${year}`; // Prints As of 06/24/2021, 01:54 to be used in the html variable below which ultimately gets passed to the insertAdjacentHTML method and inserted into the DOM.
+  } 
+}
+
 const displayMovements = (account, sort = false) => {   // Function in which the purpose is to loop over each money movement amount (positive for deposit & negative for withdrawals) in the data array for each person's account; Sort parameter is set to a default of false which will keep the original descending order
   containerMovements.innerHTML = '';    // Clears the HTML in this class as our HTML has some placeholders in there and we want to clear them to place our real movement data in there. Using the innerHTML function clears all the HTML within this div class and using the empty string '' does this.
 
@@ -92,10 +118,7 @@ const displayMovements = (account, sort = false) => {   // Function in which the
     const type = mov > 0 ? 'deposit' : 'withdrawal';  // If movement (mov) is greater than 0 then that means this is a deposit into our account and any negative amount means we are withdrawing. Purpose of this ternary operator is to use the result to modify our class name so that our CSS works and highlights green for deposit and red for withdrawals.
 
     const date = new Date(account.movementsDates[index]); // Creation of date variable which is the date the user logged in. Notice how this is included in the loop over the sortedMovements array; This is basically an inner loop that we are taking advantage of the index variable inside the forEach method for the movements array to save each date from the movementsDates array to the date variable.
-    const month = `${date.getMonth() + 1}`.padStart(2, 0); // Creation of a month variable using the getMonth() method; padStart method used so that in case we have months with single digits like months 1-9 it will put a leading 0 so that the date shows 06/24/2021 instead of 6/24/2021. First argument to padStart field is how many total characters there should be after padding (our case its 2) and the 2nd argument is what do you want to pad with and in this case its 0.
-    const day = `${date.getDate()}`.padStart(2, 0); // Creation of a day variable using the getDate() method; padStart method used so that in case we have dates with single digits like days 1-9 it will put a leading 0 so that the date shows 06/09/2021 instead of 6/9/2021. First argument to padStart field is how many total characters there should be after padding (our case its 2) and the 2nd argument is what do you want to pad with and in this case its 0.
-    const year = date.getFullYear(); // Creation of a variable to get full year using the getFullYear method.
-    const displayDate = `${month}/${day}/${year}`; // Prints As of 06/24/2021, 01:54 to be used in the html variable below which ultimately gets passed to the insertAdjacentHTML method and inserted into the DOM.
+    const displayDate = formattedMovementDate(date);
 
     const html = `
     <div class="movements__row">
