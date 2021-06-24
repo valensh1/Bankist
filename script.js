@@ -6,6 +6,18 @@ const account1 = {
   movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
   interestRate: 1.2, // %
   pin: 1111,
+  movementsDates: [
+    '2019-11-18T21:31:17.178Z',
+    '2019-12-23T07:42:02.383Z',
+    '2020-01-28T09:15:04.904Z',
+    '2020-04-01T10:17:24.185Z',
+    '2020-05-08T14:11:59.604Z',
+    '2020-07-26T17:01:17.194Z',
+    '2020-07-28T23:36:17.929Z',
+    '2020-08-01T10:51:36.790Z',
+  ],
+  currency: 'EUR',
+  locale: 'pt-PT' // de-DE
 };
 
 const account2 = {
@@ -13,6 +25,18 @@ const account2 = {
   movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
   interestRate: 1.5,
   pin: 2222,
+  movementsDates: [
+    '2019-11-01T13:15:33.035Z',
+    '2019-11-30T09:48:16.867Z',
+    '2019-12-25T06:04:23.907Z',
+    '2020-01-25T14:18:46.235Z',
+    '2020-02-05T16:33:06.386Z',
+    '2020-04-10T14:43:26.374Z',
+    '2020-06-25T18:49:59.371Z',
+    '2020-07-26T12:01:20.894Z',
+  ],
+  currency: 'USD',
+  locale: 'en-US'
 };
 
 const account3 = {
@@ -67,9 +91,16 @@ const displayMovements = (account, sort = false) => {   // Function in which the
   sortedMovements.forEach((mov, index) => {   // Loop over sortedMovement (mov) amount supplied to function with forEach method
     const type = mov > 0 ? 'deposit' : 'withdrawal';  // If movement (mov) is greater than 0 then that means this is a deposit into our account and any negative amount means we are withdrawing. Purpose of this ternary operator is to use the result to modify our class name so that our CSS works and highlights green for deposit and red for withdrawals.
 
+    const date = new Date(account.movementsDates[index]); // Creation of date variable which is the date the user logged in. Notice how this is included in the loop over the sortedMovements array; This is basically an inner loop that we are taking advantage of the index variable inside the forEach method for the movements array to save each date from the movementsDates array to the date variable.
+    const month = `${date.getMonth() + 1}`.padStart(2, 0); // Creation of a month variable using the getMonth() method; padStart method used so that in case we have months with single digits like months 1-9 it will put a leading 0 so that the date shows 06/24/2021 instead of 6/24/2021. First argument to padStart field is how many total characters there should be after padding (our case its 2) and the 2nd argument is what do you want to pad with and in this case its 0.
+    const day = `${date.getDate()}`.padStart(2, 0); // Creation of a day variable using the getDate() method; padStart method used so that in case we have dates with single digits like days 1-9 it will put a leading 0 so that the date shows 06/09/2021 instead of 6/9/2021. First argument to padStart field is how many total characters there should be after padding (our case its 2) and the 2nd argument is what do you want to pad with and in this case its 0.
+    const year = date.getFullYear(); // Creation of a variable to get full year using the getFullYear method.
+    const displayDate = `${month}/${day}/${year}`; // Prints As of 06/24/2021, 01:54 to be used in the html variable below which ultimately gets passed to the insertAdjacentHTML method and inserted into the DOM.
+
     const html = `
     <div class="movements__row">
       <div class="movements__type movements__type--${type}">${index + 1} ${type}</div>
+      <div class="movements__date">${displayDate}</div>
       <div class="movements__value">${mov.toFixed(2)}€</div>
     </div>`;    // Variable set up so we can use with the insertAdjacentHTML method. Notice we adjusted the class name with the type variable we created above which was the ternary operator
 
@@ -101,7 +132,7 @@ const calcDisplaySummary = (account) => { // Function that calculates the summar
 
   // Interest - Interest Earned Summary Balance Total
   const interestAmts = account.movements.filter(mov => mov > 0).map(mov => (mov * account.interestRate) / 100).filter(int => int >= 1).reduce((accum, current) => accum + current); // Takes the account.movements array for each account holder and then filters that movements array for all amounts greater than 0 as this represents deposits or money coming in; The filter method will return a new array with all the amounts that are greater than 0. Then we use the map method to loop over each element in the array returned from the filter method and apply the interest rate to that amount IF the interest is greater than or equal to 1. Then we use the reduce method to sum up the array that the map method returned to get our total interest balance.
-  labelSumInterest.textContent = `${interestAmts.toFixed(2)}€`; // Update DOM for total interest
+  labelSumInterest.textContent = `${interestAmts.toFixed(2)}€`; // Update DOM for total interest; toFixed(2) adds 2 decimal places to the number
 };
 
 
@@ -128,6 +159,11 @@ const updateUI = (account) => { // Function invoking all the individual balance 
 //--------------------------------------EVENT HANDLERS----------------------------------------------
 let currentAccount; // Creation of a global variable currentAccount to display the current account holder who is logged in. Created this variable so we can get access to this variable from inside functions and also reassign values to it
 
+// Fake Always Logged In //// NEED TO DELETE
+currentAccount = account1;
+updateUI(currentAccount);
+containerApp.style.opacity = 1;
+
 // Event Handler - User Login
 btnLogin.addEventListener('click', (event) => { // Login Arrow Button; Must use event here to pass into the preventDefault() method in order to stop the default of a button click which is refreshing the page
   event.preventDefault(); // Method that prevents form from submitting
@@ -139,6 +175,15 @@ btnLogin.addEventListener('click', (event) => { // Login Arrow Button; Must use 
     // Display UI and Welcome Message
     labelWelcome.textContent = `Welcome back, ${currentAccount.owner.split(' ')[0]}`;
     containerApp.style.opacity = 1;
+
+    // Create Current Date and Time
+    const now = new Date(); // Creation of a now variable which is the current date and time of when user logs in
+    const month = `${now.getMonth() + 1}`.padStart(2, 0); // Creation of a month variable using the getMonth() method; padStart method used so that in case we have months with single digits like months 1-9 it will put a leading 0 so that the date shows 06/24/2021 instead of 6/24/2021. First argument to padStart field is how many total characters there should be after padding (our case its 2) and the 2nd argument is what do you want to pad with and in this case its 0.
+    const day = `${now.getDate()}`.padStart(2, 0); // Creation of a day variable using the getDate() method; padStart method used so that in case we have dates with single digits like days 1-9 it will put a leading 0 so that the date shows 06/09/2021 instead of 6/9/2021. First argument to padStart field is how many total characters there should be after padding (our case its 2) and the 2nd argument is what do you want to pad with and in this case its 0.
+    const year = now.getFullYear(); // Creation of a variable to get full year using the getFullYear method.
+    const hours = `${now.getHours()}`.padStart(2, 0); // Creation of a variable to get the hour the user logged in using the getHours method. padStart method used so that in case we have hours with single digits like hours 1-9 it will put a leading 0 so that the date shows 06/24/2021 instead of 6/24/2021. First argument to padStart field is how many total characters there should be after padding (our case its 2) and the 2nd argument is what do you want to pad with and in this case its 0.
+    const minutes = `${now.getMinutes()}`.padStart(2, 0); // Creation of a variable to get minutes when user logged in using the getMinutes method. padStart method used so that in case we have minutes with single digits like minutes 1-9 it will put a leading 0 so that the date shows 06/24/2021 instead of 6/24/2021. First argument to padStart field is how many total characters there should be after padding (our case its 2) and the 2nd argument is what do you want to pad with and in this case its 0.
+    labelDate.textContent = `${month}/${day}/${year}, ${hours}:${minutes}`; // Prints As of 06/24/2021, 01:54 and updates DOM (localDate.textContent) at top of page right below the Current balance heading
 
     // Clear input fields
     inputLoginUsername.value = inputLoginPin.value = ''; // Set input pin field to a blank empty string and then since the order of operations works from right to left it then assigns login username field to blank as well.
@@ -162,7 +207,11 @@ btnTransfer.addEventListener('click', (event) => { // Transfer money container w
     currentAccount.movements.push(-amount); // Push current transfer amount as a negative to the current account holders movements array
     receiverAcct.movements.push(amount); // Push current transfer amount as a positive to the receiver account holders movements array
 
-     // Update User Interface (UI)
+    // Add Transfer Date
+    currentAccount.movementsDates.push(new Date().toISOString()); // Push new date in ISOString format which is a universal world formatted date and time to the movementsDates array of the current account holder. Date and time will be as of time of money transfer (when user clicks button to transfer money)
+    receiverAcct.movementsDates.push(new Date().toISOString()); // Push new date in ISOString format which is a universal world formatted date and time to the movementsDates array of the receiver account holder. Date and time will be as of time of money transfer (when user clicks button to transfer money)
+    
+    // Update User Interface (UI)
      updateUI(currentAccount); // Invoke the updateUI function which retrieves balances and pass in the currentAccount object as the argument
 });
 
@@ -173,13 +222,16 @@ btnLoan.addEventListener('click', (event) => { // Event handler for requesting a
   const loanAmountPercentage = .10; // To receive a loan there must be a deposit of at least this percentage of the loan amount.
   if(amount > 0 && currentAccount.movements.some(mov => mov >= amount * loanAmountPercentage)) { // If condition to check to see if the loan amount is greater than 0 AND the use of the some method to see if there was some or any deposits that equaled at least 10% or greater of the requested loan amount.
     currentAccount.movements.push(amount); // Add loan amount to accound holders movements array
+     
+    // Add Loan Date
+     currentAccount.movementsDates.push(new Date().toISOString()); // Push new date in ISOString format which is a universal world formatted date and time to the movementsDates array of the current account holder. Date and time will be as of time of loan (when user clicks button to receive loan)
+
     updateUI(currentAccount); // Invoke updateUI function to update account holders balances upon receiving the loan
     inputLoanAmount.value = ''; // Blank out the input field after hitting ENTER or arrow submit button so that the input field loses its focus.
   } else {
       alert(`Must have a deposit that is greater than or equal to ${loanAmountPercentage * 100}% the loan amount requested`); // Alert if loan amount requested is larger than the 10% rule of needing at least one deposit that is greater than or equal to the LoanAmountPercentage * loan amount requested.
   }
   })
-
 
 // Event Handler - Close Account
 btnClose.addEventListener('click', (event) => {  // Event handler to close account
