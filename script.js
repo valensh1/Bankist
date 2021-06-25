@@ -44,14 +44,54 @@ const account3 = {
   movements: [200, -200, 340, -300, -20, 50, 400, -460],
   interestRate: 0.7,
   pin: 3333,
+  movementsDates: [
+    '2019-11-01T13:15:33.035Z',
+    '2019-11-30T09:48:16.867Z',
+    '2019-12-25T06:04:23.907Z',
+    '2020-01-25T14:18:46.235Z',
+    '2020-02-05T16:33:06.386Z',
+    '2020-04-10T14:43:26.374Z',
+    '2020-06-25T18:49:59.371Z',
+    '2020-07-26T12:01:20.894Z',
+  ],
+  currency: 'USD',
+  locale: 'en-US'
 };
 
 const account4 = {
   owner: 'Sarah Smith',
   movements: [430, 1000, 700, 50, 90],
-  interestRate: 1,
+  interestRate: 0.7,
   pin: 4444,
+  movementsDates: [
+    '2019-11-01T13:15:33.035Z',
+    '2019-11-30T09:48:16.867Z',
+    '2019-12-25T06:04:23.907Z',
+    '2020-01-25T14:18:46.235Z',
+    '2020-02-05T16:33:06.386Z',
+  ],
+  currency: 'USD',
+  locale: 'en-US'
 };
+
+// const account4 = {
+//   owner: 'Sarah Smith',
+//   movements: [430, 1000, 700, 50, 90],
+//   interestRate: 1,
+//   pin: 4444,
+//   movementsDates: [
+//     '2019-11-01T13:15:33.035Z',
+//     '2019-11-30T09:48:16.867Z',
+//     '2019-12-25T06:04:23.907Z',
+//     '2020-01-25T14:18:46.235Z',
+//     '2020-02-05T16:33:06.386Z',
+//     '2020-04-10T14:43:26.374Z',
+//     '2020-06-25T18:49:59.371Z',
+//     '2020-07-26T12:01:20.894Z',
+//   ],
+//   currency: 'USD',
+//   locale: 'en-US'
+// };
 
 const accounts = [account1, account2, account3, account4];
 
@@ -109,6 +149,7 @@ const formattedMovementDate = (date , locale = 'en-US') => {
       month: 'numeric', // Can use 'long' such as 'March' or you can use 'numeric' such as 2 or '2-digit' such as 02 or you can use 'short' such as 'Mar'. Months start at 0 index.
       year: 'numeric' // Can use 'numeric' which is 4 digit such as '2021' or specify '2-digit' here for year format such as '21'
   };
+
     return Intl.DateTimeFormat(locale, options).format(date); // Shows date next to each transaction such as 2/5/2020, 08:33 AM in US format
     } 
 };
@@ -130,7 +171,7 @@ const displayMovements = (account, sort = false) => {   // Function in which the
     const type = mov > 0 ? 'deposit' : 'withdrawal';  // If movement (mov) is greater than 0 then that means this is a deposit into our account and any negative amount means we are withdrawing. Purpose of this ternary operator is to use the result to modify our class name so that our CSS works and highlights green for deposit and red for withdrawals.
 
     const date = new Date(account.movementsDates?.[index]); // Creation of date variable which is the dates of all the transactions in each account holders object. Notice how this is included in the loop over the sortedMovements array; This is basically an inner loop that we are taking advantage of the index variable inside the forEach method for the movements array to save each date from the movementsDates array to the date variable.
-    const displayDate = account?.movementsDates ? formattedMovementDate(date, account.locale) : 'No Time on Record'; // If there is a account.movementsDates key then invoke formattedMovementDate function and pass in the date; Date passed in is one of the dates from the account holders movementsDates arrays which is the date the transaction occurred. Otherwise if no account.movementsDates key then just print 'No Time on Record' to be displayed as there is no recorded time of when the transaction took place
+    const displayDate = formattedMovementDate(date, account.locale) // If there is a account.movementsDates key then invoke formattedMovementDate function and pass in the date; Date passed in is one of the dates from the account holders movementsDates arrays which is the date the transaction occurred. Otherwise if no account.movementsDates key then just print 'No Time on Record' to be displayed as there is no recorded time of when the transaction took place
     
     const formattedCurrency = formattedMovementCurrency(mov, account.locale, account.currency); // Creation of formattedCurrency variable which is the result of invoking the function formattedMovementCurrency with the first argument provided to the function being the amount of each movement, the 2nd argument being the locale/location of each user, and the last argument being the currency of each account holder (account.currency)
 
@@ -250,14 +291,9 @@ btnTransfer.addEventListener('click', (event) => { // Transfer money container w
     receiverAcct.movements.push(amount); // Push current transfer amount as a positive to the receiver account holders movements array
 
     // Add Transfer Date
-    if (currentAccount?.movementsDates && receiverAcct?.movementsDates) {
     currentAccount.movementsDates.push(new Date().toISOString()); // Push new date in ISOString format which is a universal world formatted date and time to the movementsDates array of the current account holder. Date and time will be as of time of money transfer (when user clicks button to transfer money)
     receiverAcct.movementsDates.push(new Date().toISOString()); // Push new date in ISOString format which is a universal world formatted date and time to the movementsDates array of the receiver account holder. Date and time will be as of time of money transfer (when user clicks button to transfer money)
-    } else {
-      currentAccount.movementsDates.push(new Date().toISOString()); // Push new date in ISOString format which is a universal world formatted date and time to the movementsDates array of the current account holder. Date and time will be as of time of money transfer (when user clicks button to transfer money)
-      receiverAcct.movementsDates = new Date().toISOString();
-      console.log(receiverAcct.movementsDates);
-    }
+  
     // Update User Interface (UI)
      updateUI(currentAccount); // Invoke the updateUI function which retrieves balances and pass in the currentAccount object as the argument
   }
