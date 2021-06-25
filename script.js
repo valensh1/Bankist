@@ -84,29 +84,33 @@ const inputClosePin = document.querySelector('.form__input--pin');
 
 //--------------------------------------FUNCTIONS----------------------------------------------
 
-const formattedMovementDate = (date) => {
+const formattedMovementDate = (date , locale = 'en-US') => {
   const dateDiff = ((date1, date2) => { // Creation of function to subtract dates to get the days between
     return Math.round(Math.abs((date2 - date1) / (1000 * 60 * 60 * 24)));   // Subtract dates and divide by / (1000 (converts miliseconds to seconds) * 60 (converts seconds to minutes) * 60 (converts minutes to hours) * 24 (converts minutes to days)); Math.abs used to eliminate any negatives if the earlier date entered first; There are 24 hours in a day, 60 minutes in one hour, 60 seconds in 1 minute and 1000 miliseconds in one second. We have to do the conversion because just subtracting the dates JavaScript gives the dates in a time since a date back in 1970 for both dates so then when subtracting the 2 dates you get the difference in miliseconds and then you are converting this into days.
     });
-  const daysPassed = dateDiff (new Date(), date);
-  console.log(daysPassed);
+  const daysPassed = dateDiff (new Date(), date); // Creation of the daysPassed variable which is the result of using the dateDiff function above where it tries to get the difference in days between 2 days and those 2 dates passed into function are today's date (new Date()) and the date variable that was passed into the function formattedMovementDate function which is ultimately just the dates of the individual transaactions from the movementsDates array under each account holder
 
-  switch(true) {
-    case daysPassed === 0:
+  switch(true) {    // Creation of switch statement with the key argument being true
+    case daysPassed === 0: // If result of daysPassed variable equals 0 then return 'Today' which will be displayed next to transaction as the date
       return 'Today';
       break;
-    case daysPassed === 1:
+    case daysPassed === 1: // If result of daysPassed variable equals 1 then return 'Yesterday' which will be displayed next to transaction as the date
       return 'Yesterday';
       break;
-    case daysPassed <= 7:
+    case daysPassed <= 7: // If result of daysPassed variable is less than or equal to 7 then return the daysPassed variable days ago which will be displayed next to transaction as the date such as '6 days ago'
       return `${daysPassed} days ago`;
       break;
-    default:
-      const month = `${date.getMonth() + 1}`.padStart(2, 0); // Creation of a month variable using the getMonth() method; padStart method used so that in case we have months with single digits like months 1-9 it will put a leading 0 so that the date shows 06/24/2021 instead of 6/24/2021. First argument to padStart field is how many total characters there should be after padding (our case its 2) and the 2nd argument is what do you want to pad with and in this case its 0.
-      const day = `${date.getDate()}`.padStart(2, 0); // Creation of a day variable using the getDate() method; padStart method used so that in case we have dates with single digits like days 1-9 it will put a leading 0 so that the date shows 06/09/2021 instead of 6/9/2021. First argument to padStart field is how many total characters there should be after padding (our case its 2) and the 2nd argument is what do you want to pad with and in this case its 0.
-      const year = date.getFullYear(); // Creation of a variable to get full year using the getFullYear method.
-      return `${month}/${day}/${year}`; // Prints As of 06/24/2021, 01:54 to be used in the html variable below which ultimately gets passed to the insertAdjacentHTML method and inserted into the DOM.
-  } 
+    default: // Default format if none of the above conditions are true then just display the date in format such as month/day/year.
+    const options = {
+      hour: '2-digit', // Can use '2-digit' such as here which would show 01 when month is Feb (months start at 0 index) or 'numeric' which is 1 digit as an option which would just show the number 1 by itself when month's are in single digits.
+      minute: 'numeric', // Can use 'numeric' such as here or '2-digit' as an option
+      // weekday: 'long', // Day of week; Can use 'long' which is = 'Thursday' or you can use 'short' which is = 'Thu'
+      day: 'numeric', // Day of month; Can use 'numeric' which is = 1 or use '2-digit' which is 01
+      month: 'numeric', // Can use 'long' such as 'March' or you can use 'numeric' such as 2 or '2-digit' such as 02 or you can use 'short' such as 'Mar'. Months start at 0 index.
+      year: 'numeric' // Can use 'numeric' which is 4 digit such as '2021' or specify '2-digit' here for year format such as '21'
+  };
+    return Intl.DateTimeFormat(locale, options).format(date);
+    } 
 }
 
 const displayMovements = (account, sort = false) => {   // Function in which the purpose is to loop over each money movement amount (positive for deposit & negative for withdrawals) in the data array for each person's account; Sort parameter is set to a default of false which will keep the original descending order
@@ -117,9 +121,9 @@ const displayMovements = (account, sort = false) => {   // Function in which the
   sortedMovements.forEach((mov, index) => {   // Loop over sortedMovement (mov) amount supplied to function with forEach method
     const type = mov > 0 ? 'deposit' : 'withdrawal';  // If movement (mov) is greater than 0 then that means this is a deposit into our account and any negative amount means we are withdrawing. Purpose of this ternary operator is to use the result to modify our class name so that our CSS works and highlights green for deposit and red for withdrawals.
 
-    const date = new Date(account.movementsDates[index]); // Creation of date variable which is the date the user logged in. Notice how this is included in the loop over the sortedMovements array; This is basically an inner loop that we are taking advantage of the index variable inside the forEach method for the movements array to save each date from the movementsDates array to the date variable.
-    const displayDate = formattedMovementDate(date);
-
+    const date = new Date(account.movementsDates?.[index]); // Creation of date variable which is the dates of all the transactions in each account holders object. Notice how this is included in the loop over the sortedMovements array; This is basically an inner loop that we are taking advantage of the index variable inside the forEach method for the movements array to save each date from the movementsDates array to the date variable.
+    const displayDate = account?.movementsDates ? formattedMovementDate(date, account.locale) : 'No Time on Record'; // If there is a account.movementsDates key then invoke formattedMovementDate function and pass in the date; Date passed in is one of the dates from the account holders movementsDates arrays which is the date the transaction occurred. Otherwise if no account.movementsDates key then just print 'No Time on Record' to be displayed as there is no recorded time of when the transaction took place
+    
     const html = `
     <div class="movements__row">
       <div class="movements__type movements__type--${type}">${index + 1} ${type}</div>
@@ -196,24 +200,28 @@ btnLogin.addEventListener('click', (event) => { // Login Arrow Button; Must use 
   if(currentAccount ?.pin === Number(inputLoginPin.value)) { // Checks if the find method account object it finds and returns the pin on that object matches the pin entered in by the user. Notice we use the optional chaining method here ?. which states that if there is undefined for currentAccount then don't search for .pin and just return undefined. This avoids an error. If didn't have optional chaining ?. method this would error out our program. It only searches for the .pin key if currentAccount is a valid account and not undefined.
     
     // Display UI and Welcome Message
-    labelWelcome.textContent = `Welcome back, ${currentAccount.owner.split(' ')[0]}`;
-    containerApp.style.opacity = 1;
+    labelWelcome.textContent = `Welcome back, ${currentAccount.owner.split(' ')[0]}`; // Display in DOM 'Welcome back and then only displaying owners first name that is why we are taking the full name of owner from currentAcount.owner and then splitting that string into an array by spaces in the string with each of his first, middle and last as an element with an index of 0,1,2 in array and then we are grabbing the first name only which is located at index position 0. 
+    containerApp.style.opacity = 1; // Sets opacity to 1 so we see the elements on screen
 
     // Create Current Date and Time
-    const now = new Date(); // Creation of a now variable which is the current date and time of when user logs in
-    const month = `${now.getMonth() + 1}`.padStart(2, 0); // Creation of a month variable using the getMonth() method; padStart method used so that in case we have months with single digits like months 1-9 it will put a leading 0 so that the date shows 06/24/2021 instead of 6/24/2021. First argument to padStart field is how many total characters there should be after padding (our case its 2) and the 2nd argument is what do you want to pad with and in this case its 0.
-    const day = `${now.getDate()}`.padStart(2, 0); // Creation of a day variable using the getDate() method; padStart method used so that in case we have dates with single digits like days 1-9 it will put a leading 0 so that the date shows 06/09/2021 instead of 6/9/2021. First argument to padStart field is how many total characters there should be after padding (our case its 2) and the 2nd argument is what do you want to pad with and in this case its 0.
-    const year = now.getFullYear(); // Creation of a variable to get full year using the getFullYear method.
-    const hours = `${now.getHours()}`.padStart(2, 0); // Creation of a variable to get the hour the user logged in using the getHours method. padStart method used so that in case we have hours with single digits like hours 1-9 it will put a leading 0 so that the date shows 06/24/2021 instead of 6/24/2021. First argument to padStart field is how many total characters there should be after padding (our case its 2) and the 2nd argument is what do you want to pad with and in this case its 0.
-    const minutes = `${now.getMinutes()}`.padStart(2, 0); // Creation of a variable to get minutes when user logged in using the getMinutes method. padStart method used so that in case we have minutes with single digits like minutes 1-9 it will put a leading 0 so that the date shows 06/24/2021 instead of 6/24/2021. First argument to padStart field is how many total characters there should be after padding (our case its 2) and the 2nd argument is what do you want to pad with and in this case its 0.
-    labelDate.textContent = `${month}/${day}/${year}, ${hours}:${minutes}`; // Prints As of 06/24/2021, 01:54 and updates DOM (localDate.textContent) at top of page right below the Current balance heading
+    const nowDate = new Date(); // Creates a new date with today being the date
+    const options = {
+        hour: '2-digit', // Can use '2-digit' such as here which would show 01 when month is Feb (months start at 0 index) or 'numeric' which is 1 digit as an option which would just show the number 1 by itself when month's are in single digits.
+        minute: 'numeric', // Can use 'numeric' such as here or '2-digit' as an option
+        // weekday: 'long', // Day of week; Can use 'long' which is = 'Thursday' or you can use 'short' which is = 'Thu'
+        day: 'numeric', // Day of month; Can use 'numeric' which is = 1 or use '2-digit' which is 01
+        month: 'numeric', // Can use 'long' such as 'March' or you can use 'numeric' such as 2 or '2-digit' such as 02 or you can use 'short' such as 'Mar'. Months start at 0 index.
+        year: 'numeric' // Can use 'numeric' which is 4 digit such as '2021' or specify '2-digit' here for year format such as '21'
+    };
+    const locale = currentAccount.locale; // Gets the language format from currentAccount holders locale key on their account object.
+    labelDate.textContent = Intl.DateTimeFormat(locale, options).format(nowDate); // Intl.DateTimeFormat method called with first argument to method being the country (uses locale variable which is default country the user's browser is set to). The 2nd argument is all the options you want to include. We are using options from the option object variable we created above. Don't have to include all the options. So....if you don't want to show minutes just remove it entirely from the options object. Then pass the date you want formatted in the format method (nowDate variable passed in this example)
 
-    // Clear input fields
-    inputLoginUsername.value = inputLoginPin.value = ''; // Set input pin field to a blank empty string and then since the order of operations works from right to left it then assigns login username field to blank as well.
-    inputLoginPin.blur(); // Blur method causes element to lose its focus.
+        // Clear input fields
+        inputLoginUsername.value = inputLoginPin.value = ''; // Set input pin field to a blank empty string and then since the order of operations works from right to left it then assigns login username field to blank as well.
+        inputLoginPin.blur(); // Blur method causes element to lose its focus.
 
-    // Update User Interface (UI)
-    updateUI(currentAccount);
+        // Update User Interface (UI)
+        updateUI(currentAccount);
   }
 });
 
