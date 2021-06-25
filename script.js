@@ -109,9 +109,17 @@ const formattedMovementDate = (date , locale = 'en-US') => {
       month: 'numeric', // Can use 'long' such as 'March' or you can use 'numeric' such as 2 or '2-digit' such as 02 or you can use 'short' such as 'Mar'. Months start at 0 index.
       year: 'numeric' // Can use 'numeric' which is 4 digit such as '2021' or specify '2-digit' here for year format such as '21'
   };
-    return Intl.DateTimeFormat(locale, options).format(date);
+    return Intl.DateTimeFormat(locale, options).format(date); // Shows date next to each transaction such as 2/5/2020, 08:33 AM in US format
     } 
-}
+};
+
+const formattedMovementCurrency = (value, locale = 'en-US', currency = 'USD') => { // Function which the purpose is to format the transaction amounts in user account holder's local currency; Pass in the value, the locale (default 'en-US') and the currency (default is 'USD')
+  const options = {   // Formatting options for whic you want to display
+    style: 'currency',
+    currency: currency // If style above is 'currency' you must have a currency key/value pair
+  };
+  return Intl.NumberFormat(locale, options).format(value); // Returns formatted currency value such as $8,500.00 for 'USD' and 1300,00 € for 'EUR'
+};
 
 const displayMovements = (account, sort = false) => {   // Function in which the purpose is to loop over each money movement amount (positive for deposit & negative for withdrawals) in the data array for each person's account; Sort parameter is set to a default of false which will keep the original descending order
   containerMovements.innerHTML = '';    // Clears the HTML in this class as our HTML has some placeholders in there and we want to clear them to place our real movement data in there. Using the innerHTML function clears all the HTML within this div class and using the empty string '' does this.
@@ -124,11 +132,13 @@ const displayMovements = (account, sort = false) => {   // Function in which the
     const date = new Date(account.movementsDates?.[index]); // Creation of date variable which is the dates of all the transactions in each account holders object. Notice how this is included in the loop over the sortedMovements array; This is basically an inner loop that we are taking advantage of the index variable inside the forEach method for the movements array to save each date from the movementsDates array to the date variable.
     const displayDate = account?.movementsDates ? formattedMovementDate(date, account.locale) : 'No Time on Record'; // If there is a account.movementsDates key then invoke formattedMovementDate function and pass in the date; Date passed in is one of the dates from the account holders movementsDates arrays which is the date the transaction occurred. Otherwise if no account.movementsDates key then just print 'No Time on Record' to be displayed as there is no recorded time of when the transaction took place
     
+    const formattedCurrency = formattedMovementCurrency(mov, account.locale, account.currency); // Creation of formattedCurrency variable which is the result of invoking the function formattedMovementCurrency with the first argument provided to the function being the amount of each movement, the 2nd argument being the locale/location of each user, and the last argument being the currency of each account holder (account.currency)
+
     const html = `
     <div class="movements__row">
       <div class="movements__type movements__type--${type}">${index + 1} ${type}</div>
       <div class="movements__date">${displayDate}</div>
-      <div class="movements__value">${mov.toFixed(2)}€</div>
+      <div class="movements__value">${formattedCurrency}</div>
     </div>`;    // Variable set up so we can use with the insertAdjacentHTML method. Notice we adjusted the class name with the type variable we created above which was the ternary operator
 
     containerMovements.insertAdjacentHTML('afterbegin', html); // Takes the containerMovements DOM variable which is just the overall container for the movements section and uses the insertAdjacentHTML method which basically inserts html right into a specified place in the DOM which in this case is the containerMovements. The first argument of the insertAdjacent HTML is where you want it inserted. The 'afterbegin' argument places the HTML after the element but before any other content that is already present inside that element. In our case with each element it loops over it places it at the beginning of the container element so finally by the last item it loops over that will be the one that shows first up top. This method is basically displaying in descending order. The other option 'beforeend' would place the items in ascending order. The 2nd argument to insertAdjacentHTML is the HTML you want to insert and in our case it is the html variable we created.
@@ -140,26 +150,27 @@ const calcDisplayBalance = (account) => { // Function that accepts an entire acc
   account.balance = account.movements.reduce((accum, current) => { // Creation of a balance variable on the account holders object that consists of the returned value from running the reduce method on the account.movements array; The method accepts an accum variable which starts at 0 unless otherwise specified at end of reduce method and then adds each current value on to the accum variable. So accum starts at 0 (unless otherwise specified) takes the first number and then adds that to the accum variable then goes to the 2nd number in array and adds that to accum variable, etc.
     return accum + current  // Add accum + current; Accum variable which starts at 0 unless otherwise specified at end of reduce method and then adds each current value on to the accum variable. So accum starts at 0 (unless otherwise specified) takes the first number and then adds that to the accum variable then goes to the 2nd number in array and adds that to accum variable, etc.
   }, 0);                    // Don't need to put 0 here as the default is 0 but if you wanted it to start at a different number you would insert a number here. For example, if you wanted 10 added to the sum of the array you would put 10 here. as the accum variable would start with 10 instead of starting at 0
-  labelBalance.textContent = `${account.balance.toFixed(2)}€`; // Adds the newly created key/value pair (account.balance) we added to account holder's object inside a template literal to DOM
+  labelBalance.textContent = formattedMovementCurrency(account.balance, account.locale, account.currency); // Adds the newly created key/value pair (account.balance) we added to account holder's object inside a template literal to DOM
 };   
 
 
 const calcDisplaySummary = (account) => { // Function that calculates the summary balance for each account holder (summary balance for deposits/moneyOut/interest)
   // Deposit - Summary Balance Total
   const deposits = account.movements.filter(mov => mov > 0).reduce((accum, current) => accum + current); // Takes the account.movements array for each account holder and then filters that movements array for all amounts greater than 0 as this represents deposits or money coming in; The filter method will return a new array with all the amounts that are greater than 0. Then we use the reduce method to sum up the array that the filter method returned to get our total deposit balance.
-  labelSumIn.textContent = `${deposits.toFixed(2)}€`; // Update DOM for total deposits
+  labelSumIn.textContent = formattedMovementCurrency(deposits, account.locale, account.currency); // Update DOM for total deposits; Invoke the formattedMovementCurrency function passing in the deposit amounts, the account holders locale location and their respective currency for that location
 
   // Withdrawals / Money Going Out - Summary Balance Total
   if (account.movements.some(el => el < 0)){ // If current Account holders movements have some movements that are below 0 then do code below. Use .some() method to determine if the current account holder's movements have any or some negative amounts in there and if so then do code below. If didn't have this it would throw an error.
   const moneyOut = account.movements.filter(mov => mov < 0).reduce((accum, current) => accum + current); // Takes the movements array for each account holder and then filters that movements array for all amounts less than 0 as this represents money going out; The filter method will return a new array with all the amounts that are less than 0. Then we use the reduce method to sum up the array that the filter method returned to get our total moneyOut balance.
-  labelSumOut.textContent = `${Math.abs(moneyOut).toFixed(2)}€`; // Update DOM for total money going out
+
+  labelSumOut.textContent = formattedMovementCurrency(Math.abs(moneyOut), account.locale, account.currency); // Update DOM for total money going out by invoking the formattedMovementCurrency function and then passing in the moneyOut variable as the value to be formatted and also passing in the country locale location along with the country currency.
   } else {
-    labelSumOut.textContent = `0€`; // Else if no movements with negative amounts or no money going out then update DOM to reflect 0 for no money going out.
+    labelSumOut.textContent = formattedMovementCurrency(0, account.locale, account.currency); // Else if no movements with negative amounts or no money going out then update DOM to reflect 0 for no money going out by passing 0 and the country locale location and curency into the formattedMovementCurrency function
   }
 
   // Interest - Interest Earned Summary Balance Total
   const interestAmts = account.movements.filter(mov => mov > 0).map(mov => (mov * account.interestRate) / 100).filter(int => int >= 1).reduce((accum, current) => accum + current); // Takes the account.movements array for each account holder and then filters that movements array for all amounts greater than 0 as this represents deposits or money coming in; The filter method will return a new array with all the amounts that are greater than 0. Then we use the map method to loop over each element in the array returned from the filter method and apply the interest rate to that amount IF the interest is greater than or equal to 1. Then we use the reduce method to sum up the array that the map method returned to get our total interest balance.
-  labelSumInterest.textContent = `${interestAmts.toFixed(2)}€`; // Update DOM for total interest; toFixed(2) adds 2 decimal places to the number
+  labelSumInterest.textContent = formattedMovementCurrency(interestAmts, account.locale, account.currency); // Update DOM for total interest; Invoke the formattedMovementCurrency function passing in the interestAmts, the account holders locale location and their respective currency for that location
 };
 
 
@@ -234,17 +245,23 @@ btnTransfer.addEventListener('click', (event) => { // Transfer money container w
 
   inputTransferAmount.value = inputTransferTo.value = ''; // Clear the transfer money section input fields after clicking the arrow button or the ENTER button to transfer money
 
-  if (amount > 0 && receiverAcct && currentAccount.balance >= amount && receiverAcct ?.username !== currentAccount.username) // Conditions that need to check out as TRUE in order to have a valid money transfer such as the balance in holders account has to be >= amount to be transferred, etc.
+  if (amount > 0 && receiverAcct && currentAccount.balance >= amount && receiverAcct ?.username !== currentAccount.username) { // Conditions that need to check out as TRUE in order to have a valid money transfer such as the balance in holders account has to be >= amount to be transferred, etc.
     currentAccount.movements.push(-amount); // Push current transfer amount as a negative to the current account holders movements array
     receiverAcct.movements.push(amount); // Push current transfer amount as a positive to the receiver account holders movements array
 
     // Add Transfer Date
+    if (currentAccount?.movementsDates && receiverAcct?.movementsDates) {
     currentAccount.movementsDates.push(new Date().toISOString()); // Push new date in ISOString format which is a universal world formatted date and time to the movementsDates array of the current account holder. Date and time will be as of time of money transfer (when user clicks button to transfer money)
     receiverAcct.movementsDates.push(new Date().toISOString()); // Push new date in ISOString format which is a universal world formatted date and time to the movementsDates array of the receiver account holder. Date and time will be as of time of money transfer (when user clicks button to transfer money)
-    
+    } else {
+      currentAccount.movementsDates.push(new Date().toISOString()); // Push new date in ISOString format which is a universal world formatted date and time to the movementsDates array of the current account holder. Date and time will be as of time of money transfer (when user clicks button to transfer money)
+      receiverAcct.movementsDates = new Date().toISOString();
+      console.log(receiverAcct.movementsDates);
+    }
     // Update User Interface (UI)
      updateUI(currentAccount); // Invoke the updateUI function which retrieves balances and pass in the currentAccount object as the argument
-});
+  }
+    });
 
 // Event Handler - Request Loan
 btnLoan.addEventListener('click', (event) => { // Event handler for requesting a loan section
