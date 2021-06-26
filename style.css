@@ -221,6 +221,15 @@ nav {
   background-image: linear-gradient(to top left, #39b385, #9be15d);
 }
 
+.loan-request::before {
+  content: '...';
+}
+.loan-request{
+  color: red;
+  font-size: 1.4rem;
+  visibility: hidden;
+}
+
 .operation--close {
   background-image: linear-gradient(to top left, #e52a5a, #ff585f);
 }

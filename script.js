@@ -1,6 +1,6 @@
 'use strict';
 
-//--------------------------------------DATA----------------------------------------------
+//-------------------------------------------------------------------DATA---------------------------------------------------------------------------------------
 const account1 = {
   owner: 'Jonas Schmedtmann',
   movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
@@ -74,9 +74,14 @@ const account4 = {
   locale: 'en-US'
 };
 
-const accounts = [account1, account2, account3, account4];
 
-//--------------------------------------DOM ELEMENTS----------------------------------------------
+//-------------------------------------------------------------------GLOBAL VARIABLES--------------------------------------------------------------------------------------
+const accounts = [account1, account2, account3, account4]; // Creation of account array variable that holds all our account objects within the array so we can loop over the array to get account holder information
+let currentAccount; // Creation of a global variable currentAccount to display the current account holder who is logged in. Created this variable so we can get access to this variable from inside functions and also reassign values to it
+let timerSet; // Creation of global variable which this variable is set if there is a timer running
+
+
+//-------------------------------------------------------------------DOM ELEMENTS--------------------------------------------------------------------------------------
 const labelWelcome = document.querySelector('.welcome');
 const labelDate = document.querySelector('.date');
 const labelBalance = document.querySelector('.balance__value');
@@ -91,6 +96,7 @@ const containerMovements = document.querySelector('.movements');
 const btnLogin = document.querySelector('.login__btn');
 const btnTransfer = document.querySelector('.form__btn--transfer');
 const btnLoan = document.querySelector('.form__btn--loan');
+const LoanRequestMessage = document.querySelector('.loan-request');
 const btnClose = document.querySelector('.form__btn--close');
 const btnSort = document.querySelector('.btn--sort');
 
@@ -103,7 +109,7 @@ const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
 
-//--------------------------------------FUNCTIONS----------------------------------------------
+//----------------------------------------------------------------------FUNCTIONS-----------------------------------------------------------------------------------------------------------
 
 const formattedMovementDate = (date , locale = 'en-US') => {
   const dateDiff = ((date1, date2) => { // Creation of function to subtract dates to get the days between
@@ -218,13 +224,13 @@ const updateUI = (account) => { // Function invoking all the individual balance 
 
 // Log out Timer Function
 const startLogOutTimer = () => { // This function is immediately invoked upon the user logging in
-  let time = 30; // Time in seconds
+  let time = 300; // Time in seconds
 
   const tick = () => {  // Creation of tick function
       const minutes = String(Math.trunc(time / 60)).padStart(2,0);  // Converting time in seconds to minutes. 60 seconds in a minute so take the time in seconds above and divide by 60 to get minutes. Trunc the result so we don't get any decimals. padStart method says pad the string for a total of 2 characters and pad with 0. 1st argument is number of characters total it should have. So if it already comuputes 1 character then it will just pad the other character with 0 for a total of 2 characters. This is used so we can get the time to display with two zeroes in front like this... 05:00
-      const seconds = String(time % 60).padStart(2,0);  // Get the remainder of time divided by 60. 119 remainder of dividing by 60 would be 59 as 60 only goes into 119 once and then if you add 59 it would get you to 119; padStart method says pad the string for a total of 2 characters and pad with 0. 1st argument is number of characters total it should have. So if it already comuputes 1 character then it will just pad the other character with 0 for a total of 2 characters. This is used so we can get the time to display with two zeroes in front like this... 05:00
+      const seconds = String(time % 60).padStart(2,0);  // Get the remainder of time divided by 60. 119 remainder of dividing by 60 would be 59 as 60 only goes into 119 once and then if you add 59 it would get you to 119 so 59 would be your seconds; padStart method says pad the string for a total of 2 characters and pad with 0. 1st argument is number of characters total it should have. So if it already comuputes 1 character then it will just pad the other character with 0 for a total of 2 characters. This is used so we can get the time to display with two zeroes in front like this... 05:00
       labelTimer.textContent = `${minutes}:${seconds}`;   // Update DOM for minutes and seconds countdown timer - format looks like this 2:00
-      if (time === 0){  // When timer expires then run this code below
+    if (time === 0){  // When timer expires then run this code below
         clearInterval(timerSet); // Stops the timerSet variable which houses the setInterval method of tick that it has updating every second.
         labelWelcome.textContent = `User Session Timed Out`; // Display in DOM 'User Session Timed Out'
         labelWelcome.style.color = 'red'; // Changes the text color to red for 'User Session Timed Out'
@@ -234,17 +240,15 @@ const startLogOutTimer = () => { // This function is immediately invoked upon th
           labelWelcome.removeAttribute('style'); // Use the removeAttribute method here and identify 'style' as the attribute we want to remove as we changed the style of this to red for the 'User Sesssion Timed Out' message that we now want to go back to black text color for our 'Log in to get started' message
         },5000); // Runs code in this setTimeout method above after 5 seconds.
       }
-      time--;   // Reduce time by 1; This must go after lines of code above because when user logs in we want to show the full 5 minutes before showing the time decreasing
+    time--;   // Reduce time by 1; This must go after lines of code above because when user logs in we want to show the full 5 minutes before showing the time decreasing
   };
   tick(); // We call the function above as we want it to start the timer immediately upon calling the function. If we don't put all timer code above in function and then call function and only then set the interval to start it would display the time after 1 second and then start updating in intervals. Basically there would be a 1 second delay in the timer. We want timer to start right away so we put all the code of counting down the timer etc. in a function and immediately call it when the parent startLogOutTimer method is invoked. And then after it runs through all this line of code and starts the countdown immediately without the 1 second delay can you do line of code immediately below which is start the intervals 
-  const timerSet = setInterval(tick, 1000); // Creation of variable timerSet which houses the setInterval method of tick that runs every 1 second. This is implemented last as we want seconds to start ticking immediately upon login and not have a second delay as setting all code above in a setInterval function would cause a second delay before the timer kicks in. The code above runs immediately do to us invoking the tick method above and only after that has run once already can we impleent this setInterval method that will continue the countdown every second.
-  return timerSet;
+  const timerSet = setInterval(tick, 1000); // Creation of variable timerSet which assigns the setInterval method of tick that runs every 1 second. This is implemented last as we want seconds to start ticking immediately upon login and not have a second delay as setting all code above in a setInterval function would cause a second delay before the timer kicks in. The code above runs immediately do to us invoking the tick method above and only after that has run once already can we impleent this setInterval method that will continue the countdown every second.
+  return timerSet; // Return timerSet whenever startLogOutTimer function is ran. This is so we can resassign the global variable timerSet to a new time so we can make sure our timerSet variable constantly resets when the user shows activity.
 }
 
 
-//--------------------------------------EVENT HANDLERS----------------------------------------------
-let currentAccount; // Creation of a global variable currentAccount to display the current account holder who is logged in. Created this variable so we can get access to this variable from inside functions and also reassign values to it
-let timerSet;
+//-------------------------------------------------------------------------------EVENT HANDLERS---------------------------------------------------------------------------------------------------------------------
 
 // Event Handler - User Login
 btnLogin.addEventListener('click', (event) => { // Login Arrow Button; Must use event here to pass into the preventDefault() method in order to stop the default of a button click which is refreshing the page
@@ -276,7 +280,7 @@ btnLogin.addEventListener('click', (event) => { // Login Arrow Button; Must use 
         inputLoginPin.blur(); // Blur method causes element to lose its focus.
 
     // Create a new timer when new user logs in and remove any old timers
-        if (timerSet) clearInterval(timerSet);  
+        if (timerSet) clearInterval(timerSet); // Checks the global variable timerSet to see if any timer was set and if there was a timer on timerSet then we want to use the clearInterval method on timerSet which will stop the code from running in the intervals. If you don't clear this interval when you have another user login you will see the two timers running together and displaying both users timers at once and it looks messed up. You have to make sure you stop the interval on the previous timer before running a new setTimer interval.
         timerSet = startLogOutTimer(); // Invoke the user startLogOutTimer function which starts a timer and logs a user out after a certain amount of time elapses.
 
     // Update User Interface (UI)
@@ -305,8 +309,8 @@ btnTransfer.addEventListener('click', (event) => { // Transfer money container w
      updateUI(currentAccount); // Invoke the updateUI function which retrieves balances and pass in the currentAccount object as the argument
   
     // Reset Timer
-    if (timerSet) clearInterval(timerSet);  
-        timerSet = startLogOutTimer(); // Invoke the user startLogOutTimer function which starts a timer and logs a user out after a certain amount of time elapses.  
+    if (timerSet) clearInterval(timerSet); // Checks the global variable timerSet to see if any timer was set and if there was a timer on timerSet then we want to use the clearInterval method on timerSet which will stop the code from running in the intervals. If you don't clear this interval when you have another user login you will see the two timers running together and displaying both users timers at once and it looks messed up. You have to make sure you stop the interval on the previous timer before running a new setTimer interval.
+        timerSet = startLogOutTimer(); // Invoke the user startLogOutTimer function which starts a timer and logs a user out after a certain amount of time elapses.
     }
     });
 
@@ -314,26 +318,34 @@ btnTransfer.addEventListener('click', (event) => { // Transfer money container w
 btnLoan.addEventListener('click', (event) => { // Event handler for requesting a loan section
   event.preventDefault(); // Method that prevents default action of form which is the page refreshing upon hitting submit button or ENTER
 
+  // Message that Loan is being requested
+  LoanRequestMessage.style.visibility = 'visible';
+
   const loanTimer = setTimeout(() => {  // Timer set-up wtih 3 second delay to simulate waiting for approval process on loan.
     const amount = Math.floor(inputLoanAmount.value); // Creation of variable that takes users loan amount and rounds input value from user down based on the Math.floor() method. This method does type conversion so this method will automatically change string entered by user as input to a number along with rounding the number down.
     const loanAmountPercentage = .10; // To receive a loan there must be a deposit of at least this percentage of the loan amount.
+     
     if(amount > 0 && currentAccount.movements.some(mov => mov >= amount * loanAmountPercentage)) { // If condition to check to see if the loan amount is greater than 0 AND the use of the some method to see if there was some or any deposits that equaled at least 10% or greater of the requested loan amount.
       currentAccount.movements.push(amount); // Add loan amount to accound holders movements array
-       
+      
       // Add Loan Date
        currentAccount.movementsDates.push(new Date().toISOString()); // Push new date in ISOString format which is a universal world formatted date and time to the movementsDates array of the current account holder. Date and time will be as of time of loan (when user clicks button to receive loan)
   
       updateUI(currentAccount); // Invoke updateUI function to update account holders balances upon receiving the loan
       inputLoanAmount.value = ''; // Blank out the input field after hitting ENTER or arrow submit button so that the input field loses its focus.
+      LoanRequestMessage.style.visibility = 'hidden'; // Reset Loan Message Visibility messsage to be hidden as now the loan has been granted
     } else {
         alert(`Must have a deposit that is greater than or equal to ${loanAmountPercentage * 100}% the loan amount requested`); // Alert if loan amount requested is larger than the 10% rule of needing at least one deposit that is greater than or equal to the LoanAmountPercentage * loan amount requested.
-    }
+        LoanRequestMessage.style.visibility = 'hidden'; // Reset Loan Message Visibility messsage to be hidden as now the loan has been granted
+      }
     },3000) // Use 3000 miliseconds which is = 3 seconds for setTimeout function which will run all code above after 3 seconds
     console.log('...Waiting Approval'); // Will run line of code while setTimeout function is delayed 3 seconds in which it will tell you '....Waiting Approval'
     
       // Reset Timer
-      if (timerSet) clearInterval(timerSet);  
-      timerSet = startLogOutTimer(); // Invoke the user startLogOutTimer function which starts a timer and logs a user out after a certain amount of time elapses.  
+      if (timerSet) clearInterval(timerSet); // Checks the global variable timerSet to see if any timer was set and if there was a timer on timerSet then we want to use the clearInterval method on timerSet which will stop the code from running in the intervals. If you don't clear this interval when you have another user login you will see the two timers running together and displaying both users timers at once and it looks messed up. You have to make sure you stop the interval on the previous timer before running a new setTimer interval.
+      timerSet = startLogOutTimer(); // Invoke the user startLogOutTimer function which starts a timer and logs a user out after a certain amount of time elapses. 
+      
+     
   });
  
 
