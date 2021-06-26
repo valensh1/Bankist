@@ -74,25 +74,6 @@ const account4 = {
   locale: 'en-US'
 };
 
-// const account4 = {
-//   owner: 'Sarah Smith',
-//   movements: [430, 1000, 700, 50, 90],
-//   interestRate: 1,
-//   pin: 4444,
-//   movementsDates: [
-//     '2019-11-01T13:15:33.035Z',
-//     '2019-11-30T09:48:16.867Z',
-//     '2019-12-25T06:04:23.907Z',
-//     '2020-01-25T14:18:46.235Z',
-//     '2020-02-05T16:33:06.386Z',
-//     '2020-04-10T14:43:26.374Z',
-//     '2020-06-25T18:49:59.371Z',
-//     '2020-07-26T12:01:20.894Z',
-//   ],
-//   currency: 'USD',
-//   locale: 'en-US'
-// };
-
 const accounts = [account1, account2, account3, account4];
 
 //--------------------------------------DOM ELEMENTS----------------------------------------------
@@ -233,15 +214,37 @@ const updateUI = (account) => { // Function invoking all the individual balance 
   
       // Display Summary
       calcDisplaySummary(account); // Invoking the calcDisplaySummary method with current account holder logged in's entire object
+};
+
+// Log out Timer Function
+const startLogOutTimer = () => { // This function is immediately invoked upon the user logging in
+  let time = 30; // Time in seconds
+
+  const tick = () => {  // Creation of tick function
+      const minutes = String(Math.trunc(time / 60)).padStart(2,0);  // Converting time in seconds to minutes. 60 seconds in a minute so take the time in seconds above and divide by 60 to get minutes. Trunc the result so we don't get any decimals. padStart method says pad the string for a total of 2 characters and pad with 0. 1st argument is number of characters total it should have. So if it already comuputes 1 character then it will just pad the other character with 0 for a total of 2 characters. This is used so we can get the time to display with two zeroes in front like this... 05:00
+      const seconds = String(time % 60).padStart(2,0);  // Get the remainder of time divided by 60. 119 remainder of dividing by 60 would be 59 as 60 only goes into 119 once and then if you add 59 it would get you to 119; padStart method says pad the string for a total of 2 characters and pad with 0. 1st argument is number of characters total it should have. So if it already comuputes 1 character then it will just pad the other character with 0 for a total of 2 characters. This is used so we can get the time to display with two zeroes in front like this... 05:00
+      labelTimer.textContent = `${minutes}:${seconds}`;   // Update DOM for minutes and seconds countdown timer - format looks like this 2:00
+      if (time === 0){  // When timer expires then run this code below
+        clearInterval(timerSet); // Stops the timerSet variable which houses the setInterval method of tick that it has updating every second.
+        labelWelcome.textContent = `User Session Timed Out`; // Display in DOM 'User Session Timed Out'
+        labelWelcome.style.color = 'red'; // Changes the text color to red for 'User Session Timed Out'
+        containerApp.style.opacity = 0; // Sets opacity to 0 so we DON'T SEE the elements on screen
+        setTimeout (() => {
+          labelWelcome.textContent = 'Log in to get started'; // After 5 seconds of seeing 'User Session Timed Out' the message will change to 'Log in to get started' which is how are application first starts out
+          labelWelcome.removeAttribute('style'); // Use the removeAttribute method here and identify 'style' as the attribute we want to remove as we changed the style of this to red for the 'User Sesssion Timed Out' message that we now want to go back to black text color for our 'Log in to get started' message
+        },5000); // Runs code in this setTimeout method above after 5 seconds.
+      }
+      time--;   // Reduce time by 1; This must go after lines of code above because when user logs in we want to show the full 5 minutes before showing the time decreasing
+  };
+  tick(); // We call the function above as we want it to start the timer immediately upon calling the function. If we don't put all timer code above in function and then call function and only then set the interval to start it would display the time after 1 second and then start updating in intervals. Basically there would be a 1 second delay in the timer. We want timer to start right away so we put all the code of counting down the timer etc. in a function and immediately call it when the parent startLogOutTimer method is invoked. And then after it runs through all this line of code and starts the countdown immediately without the 1 second delay can you do line of code immediately below which is start the intervals 
+  const timerSet = setInterval(tick, 1000); // Creation of variable timerSet which houses the setInterval method of tick that runs every 1 second. This is implemented last as we want seconds to start ticking immediately upon login and not have a second delay as setting all code above in a setInterval function would cause a second delay before the timer kicks in. The code above runs immediately do to us invoking the tick method above and only after that has run once already can we impleent this setInterval method that will continue the countdown every second.
+  return timerSet;
 }
+
 
 //--------------------------------------EVENT HANDLERS----------------------------------------------
 let currentAccount; // Creation of a global variable currentAccount to display the current account holder who is logged in. Created this variable so we can get access to this variable from inside functions and also reassign values to it
-
-// Fake Always Logged In //// NEED TO DELETE
-currentAccount = account1;
-updateUI(currentAccount);
-containerApp.style.opacity = 1;
+let timerSet;
 
 // Event Handler - User Login
 btnLogin.addEventListener('click', (event) => { // Login Arrow Button; Must use event here to pass into the preventDefault() method in order to stop the default of a button click which is refreshing the page
@@ -268,11 +271,15 @@ btnLogin.addEventListener('click', (event) => { // Login Arrow Button; Must use 
     const locale = currentAccount.locale; // Gets the language format from currentAccount holders locale key on their account object.
     labelDate.textContent = Intl.DateTimeFormat(locale, options).format(nowDate); // Intl.DateTimeFormat method called with first argument to method being the country (uses locale variable which is default country the user's browser is set to). The 2nd argument is all the options you want to include. We are using options from the option object variable we created above. Don't have to include all the options. So....if you don't want to show minutes just remove it entirely from the options object. Then pass the date you want formatted in the format method (nowDate variable passed in this example)
 
-        // Clear input fields
+    // Clear input fields
         inputLoginUsername.value = inputLoginPin.value = ''; // Set input pin field to a blank empty string and then since the order of operations works from right to left it then assigns login username field to blank as well.
         inputLoginPin.blur(); // Blur method causes element to lose its focus.
 
-        // Update User Interface (UI)
+    // Create a new timer when new user logs in and remove any old timers
+        if (timerSet) clearInterval(timerSet);  
+        timerSet = startLogOutTimer(); // Invoke the user startLogOutTimer function which starts a timer and logs a user out after a certain amount of time elapses.
+
+    // Update User Interface (UI)
         updateUI(currentAccount);
   }
 });
@@ -296,26 +303,39 @@ btnTransfer.addEventListener('click', (event) => { // Transfer money container w
   
     // Update User Interface (UI)
      updateUI(currentAccount); // Invoke the updateUI function which retrieves balances and pass in the currentAccount object as the argument
-  }
+  
+    // Reset Timer
+    if (timerSet) clearInterval(timerSet);  
+        timerSet = startLogOutTimer(); // Invoke the user startLogOutTimer function which starts a timer and logs a user out after a certain amount of time elapses.  
+    }
     });
 
 // Event Handler - Request Loan
 btnLoan.addEventListener('click', (event) => { // Event handler for requesting a loan section
   event.preventDefault(); // Method that prevents default action of form which is the page refreshing upon hitting submit button or ENTER
-  const amount = Math.floor(inputLoanAmount.value); // Creation of variable that takes users loan amount and rounds input value from user down based on the Math.floor() method. This method does type conversion so this method will automatically change string entered by user as input to a number along with rounding the number down.
-  const loanAmountPercentage = .10; // To receive a loan there must be a deposit of at least this percentage of the loan amount.
-  if(amount > 0 && currentAccount.movements.some(mov => mov >= amount * loanAmountPercentage)) { // If condition to check to see if the loan amount is greater than 0 AND the use of the some method to see if there was some or any deposits that equaled at least 10% or greater of the requested loan amount.
-    currentAccount.movements.push(amount); // Add loan amount to accound holders movements array
-     
-    // Add Loan Date
-     currentAccount.movementsDates.push(new Date().toISOString()); // Push new date in ISOString format which is a universal world formatted date and time to the movementsDates array of the current account holder. Date and time will be as of time of loan (when user clicks button to receive loan)
 
-    updateUI(currentAccount); // Invoke updateUI function to update account holders balances upon receiving the loan
-    inputLoanAmount.value = ''; // Blank out the input field after hitting ENTER or arrow submit button so that the input field loses its focus.
-  } else {
-      alert(`Must have a deposit that is greater than or equal to ${loanAmountPercentage * 100}% the loan amount requested`); // Alert if loan amount requested is larger than the 10% rule of needing at least one deposit that is greater than or equal to the LoanAmountPercentage * loan amount requested.
-  }
-  })
+  const loanTimer = setTimeout(() => {  // Timer set-up wtih 3 second delay to simulate waiting for approval process on loan.
+    const amount = Math.floor(inputLoanAmount.value); // Creation of variable that takes users loan amount and rounds input value from user down based on the Math.floor() method. This method does type conversion so this method will automatically change string entered by user as input to a number along with rounding the number down.
+    const loanAmountPercentage = .10; // To receive a loan there must be a deposit of at least this percentage of the loan amount.
+    if(amount > 0 && currentAccount.movements.some(mov => mov >= amount * loanAmountPercentage)) { // If condition to check to see if the loan amount is greater than 0 AND the use of the some method to see if there was some or any deposits that equaled at least 10% or greater of the requested loan amount.
+      currentAccount.movements.push(amount); // Add loan amount to accound holders movements array
+       
+      // Add Loan Date
+       currentAccount.movementsDates.push(new Date().toISOString()); // Push new date in ISOString format which is a universal world formatted date and time to the movementsDates array of the current account holder. Date and time will be as of time of loan (when user clicks button to receive loan)
+  
+      updateUI(currentAccount); // Invoke updateUI function to update account holders balances upon receiving the loan
+      inputLoanAmount.value = ''; // Blank out the input field after hitting ENTER or arrow submit button so that the input field loses its focus.
+    } else {
+        alert(`Must have a deposit that is greater than or equal to ${loanAmountPercentage * 100}% the loan amount requested`); // Alert if loan amount requested is larger than the 10% rule of needing at least one deposit that is greater than or equal to the LoanAmountPercentage * loan amount requested.
+    }
+    },3000) // Use 3000 miliseconds which is = 3 seconds for setTimeout function which will run all code above after 3 seconds
+    console.log('...Waiting Approval'); // Will run line of code while setTimeout function is delayed 3 seconds in which it will tell you '....Waiting Approval'
+    
+      // Reset Timer
+      if (timerSet) clearInterval(timerSet);  
+      timerSet = startLogOutTimer(); // Invoke the user startLogOutTimer function which starts a timer and logs a user out after a certain amount of time elapses.  
+  });
+ 
 
 // Event Handler - Close Account
 btnClose.addEventListener('click', (event) => {  // Event handler to close account
