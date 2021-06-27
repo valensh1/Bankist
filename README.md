@@ -76,7 +76,6 @@ Alternatively, click [Here to view the finished website on live GitHub page.]( h
   4. Account will be closed and user taken back to application login screen
 NOTE: User logged in can only close their account and CANNOT close the account of another user!!!
 <br>
-![Login](Images/CloseAccount_Screenshot1.png?raw=true "Close Account Screenshot1")
 
 
 ### The Challenge
