@@ -44,29 +44,29 @@ Alternatively, click [Here to view the finished website on live GitHub page.]( h
   <br>
      pin: 4444
 
-![Login](Login_Screenshot.png?raw=true "screenshot of login")
+![Login](Images/Login_Screenshot.png?raw=true "screenshot of login")
 
 * TRANSFER MONEY:
   1. Enter user to transfer money to
   2. Enter amount to transfer
   3. Hit enter or click on arrow button
-![Login](TransferMoney_Screenshot1.png?raw=true "Transfer Money Screenshot1")
+![Login](Images/TransferMoney_Screenshot1.png?raw=true "Transfer Money Screenshot1")
 
 
 * Account Transferring Money
-![Login](TransferMoney_Screenshot2.png?raw=true "Transfer Money Screenshot2")
+![Login](Images/TransferMoney_Screenshot2.png?raw=true "Transfer Money Screenshot2")
 
 
 * Receiver of Transfer Bank Account
-![Login](TransferMoney_Screenshot3.png?raw=true "Transfer Money Screenshot3")
+![Login](Images/TransferMoney_Screenshot3.png?raw=true "Transfer Money Screenshot3")
 
 * REQUESTING A LOAN:
   1. Enter the loan amount
   2. Hit enter or click on arrow button
   <br>
 
-![Login](Loan_Screenshot1.png?raw=true "Loan Screenshot1")
-![Login](Loan_Screenshot2.png?raw=true "Loan Screenshot2")
+![Login](Images/Loan_Screenshot1.png?raw=true "Loan Screenshot1")
+![Login](Images/Loan_Screenshot2.png?raw=true "Loan Screenshot2")
 
 
 * CLOSING AN ACCOUNT:
@@ -76,7 +76,7 @@ Alternatively, click [Here to view the finished website on live GitHub page.]( h
   4. Account will be closed and user taken back to application login screen
 NOTE: User logged in can only close their account and CANNOT close the account of another user!!!
 <br>
-![Login](CloseAccount_Screenshot1.png?raw=true "Close Account Screenshot1")
+![Login](Images/CloseAccount_Screenshot1.png?raw=true "Close Account Screenshot1")
 
 
 ### The Challenge
@@ -86,7 +86,7 @@ The challenge was to build out a simplified banking application that allowed a u
 ### Screenshot
 
 Finished Version
-![screenshot of finished project](Final_Application_Screenshot.png?raw=true "screenshot of finished project")
+![screenshot of finished project](Images/Final_Application_Screenshot.png?raw=true "screenshot of finished project")
 
 
 ### Links
