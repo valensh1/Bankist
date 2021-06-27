@@ -32,8 +32,8 @@ const account2 = {
     '2020-01-25T14:18:46.235Z',
     '2020-02-05T16:33:06.386Z',
     '2020-04-10T14:43:26.374Z',
-    '2020-06-25T18:49:59.371Z',
-    '2020-07-26T12:01:20.894Z',
+    '2021-06-25T18:49:59.371Z',
+    '2021-06-26T12:01:20.894Z',
   ],
   currency: 'USD',
   locale: 'en-US'
@@ -111,6 +111,7 @@ const inputClosePin = document.querySelector('.form__input--pin');
 
 //----------------------------------------------------------------------FUNCTIONS-----------------------------------------------------------------------------------------------------------
 
+// Function to format the dates into country custom date formats
 const formattedMovementDate = (date , locale = 'en-US') => {
   const dateDiff = ((date1, date2) => { // Creation of function to subtract dates to get the days between
     return Math.round(Math.abs((date2 - date1) / (1000 * 60 * 60 * 24)));   // Subtract dates and divide by / (1000 (converts miliseconds to seconds) * 60 (converts seconds to minutes) * 60 (converts minutes to hours) * 24 (converts minutes to days)); Math.abs used to eliminate any negatives if the earlier date entered first; There are 24 hours in a day, 60 minutes in one hour, 60 seconds in 1 minute and 1000 miliseconds in one second. We have to do the conversion because just subtracting the dates JavaScript gives the dates in a time since a date back in 1970 for both dates so then when subtracting the 2 dates you get the difference in miliseconds and then you are converting this into days.
@@ -141,6 +142,7 @@ const formattedMovementDate = (date , locale = 'en-US') => {
     } 
 };
 
+// Function to format transaction amounts into country specific currency
 const formattedMovementCurrency = (value, locale = 'en-US', currency = 'USD') => { // Function which the purpose is to format the transaction amounts in user account holder's local currency; Pass in the value, the locale (default 'en-US') and the currency (default is 'USD')
   const options = {   // Formatting options for whic you want to display
     style: 'currency',
