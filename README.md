@@ -26,22 +26,19 @@ Alternatively, click [Here to view the finished website on live GitHub page.]( h
 ### How To Use
 
 * LOGGING IN: Must login to banking application by typing any of the following user names and PIN's:
-  1. user: js
-  <br>
-      pin: 1111
-  
-  2. user: jd
-  <br>
+  1. user: js  
+    pin: 1111
+
+  2. user: jd  
      pin: 2222
 
-  3. user: stw
-  <br>
+  3. user: stw  
      pin: 3333
 
-  4. user: ss
-  <br>
+  4. user: ss  
      pin: 4444
-
+ 
+     
 ![Login](Images/Login_Screenshot.png?raw=true "screenshot of login")
 
 * TRANSFER MONEY:
