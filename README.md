@@ -16,20 +16,18 @@ Alternatively, click [Here to view the finished website on live GitHub page.]( h
   - [The challenge](#the-challenge)
   - [Screenshot](#screenshot)
   - [Links](#links)
-- [My process](#my-process)
   - [Built with](#built-with)
   - [What I learned](#what-i-learned)
   - [Continued development](#continued-development)
-  - [Useful resources](#useful-resources)
 - [Author](#author)
-- [Acknowledgments](#acknowledgments)
+
 
 
 ### How To Use
 
 * LOGGING IN: Must login to banking application by typing any of the following user names and PIN's:
   1. user: js
-    <br>
+  <br>
       pin: 1111
   
   2. user: jd
@@ -73,14 +71,15 @@ Alternatively, click [Here to view the finished website on live GitHub page.]( h
   1. Enter username
   2. Enter pin
   3. Hit enter or click on arrow button
-  4. Account will be closed and user taken back to application login screen
+  4. Account will be closed and user taken back to application login screen.
+  <br>
 NOTE: User logged in can only close their account and CANNOT close the account of another user!!!
 <br>
 
 
 ### The Challenge
 
-The challenge was to build out a simplified banking application that allowed a user to login with a simple username and pin number, verify user login credentials and display only that users bank account information. Adding to the challege was displaying the users bank account information in their country's local currency along with displaying the dates on their page according to their custom country date format. Another challenging aspect was being able to transfer money or get a loan and have the money transact in the correct user's account. Lastly, the use of inactivity timers posed a challenge because you have to stop and reset timers with each transaction and also stop a previous users timer and start a new one when a new user logs in. When the activitiy timer expired a lot of testing was required to ensure the user was logged out and the application was reset to the beginning.
+The challenge was to build out a simplified banking application that allowed a user to login with a simple username and pin number, verify user login credentials and display only that users bank account information. Adding to the challege was displaying the users bank account information in their country's local currency along with displaying dates on the page according to their custom country date format. Another challenging aspect was being able to transfer money or get a loan and have the money transact in the correct user's account. Lastly, the use of inactivity timers posed a challenge because you have to stop and reset timers with each transaction and also stop a previous users timer and start a new one when a new user logs in. When the activitiy timer expired a lot of testing was required to ensure the user was logged out and the application was reset to the beginning.
 
 ### Screenshot
 
@@ -113,7 +112,7 @@ Learned to build an interactive and fully functional banking application using:
 - DOM Manipulation
 - Event Listeners - click events
   - Used buttons tied to certain click events in application such as logging in, transferring money, requesting a loan
-  - Use of forms and retrieving values from user input in forms
+- Use of forms
     - Used forms to gather information from user throughout application for such things as username, pin, transfer amounts, loan amounts, etc.
 - Switch statement
   - Used to determine if transaction dates happened within 7 days to display instead of the date but a string like 'Today' or '3 days ago' to represent when the transaction occurred
